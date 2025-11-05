@@ -1,0 +1,51 @@
+{
+ "name": "BeatAnalysis",
+ "type": "object",
+ "properties": {
+  "audio_url": {
+   "type": "string"
+ 
+        },
+  "audio_name": {
+   "type": "string"
+ 
+        },
+  "duration": {
+   "type": "number"
+ 
+        },
+  "tempo": {
+   "type": "number"
+ 
+        },
+  "beats": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "properties": {
+     "timestamp": {
+      "type": "number"
+    
+                    },
+     "confidence": {
+      "type": "number"
+    
+                    },
+     "strength": {
+      "type": "number"
+    
+                    }
+   
+                }
+  
+            }
+ 
+        },
+  "analysis_status": {
+   "type": "string",
+   "default": "pending"
+ 
+        }
+
+    }
+}

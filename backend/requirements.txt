@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+motor
+pymongo
+python-multipart
+madmom
+opencv-python-headless
+numpy==1.23

@@ -1,0 +1,59 @@
+{
+"name": "VideoAnalysis",
+"type": "object",
+"properties": {
+"video_url": {
+"type": "string",
+"description": "URL of the uploaded video file"
+        },
+"video_name": {
+"type": "string",
+"description": "Name of the video file"
+        },
+"duration": {
+"type": "number",
+"description": "Duration of the video in seconds"
+        },
+"transitions": {
+"type": "array",
+"description": "Array of detected transitions",
+"items": {
+"type": "object",
+"properties": {
+"timestamp": {
+"type": "number"
+                    },
+"type": {
+"type": "string"
+                    },
+"confidence": {
+"type": "number"
+                    },
+"visual_cue": {
+"type": "string"
+                    },
+"audio_cue": {
+"type": "string"
+
+                    }
+
+                }
+
+            }
+
+        },
+"analysis_status": {
+"type": "string",
+"enum": [
+"pending",
+"processing",
+"completed",
+"failed"
+
+            ],
+"default": "pending"
+
+        }
+
+    }
+}
