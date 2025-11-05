@@ -1,23 +1,24 @@
 import React from "react";
-import { base44 } from "@/api/client"; // Corrected import
+import { base44 } from "@/api/base44Client";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"; // Corrected import
-import { Badge } from "../../components/ui/badge"; // Corrected import
-import { Button } from "../../components/ui/button"; // Corrected import
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Play, Clock, Zap, Download, Trash2 } from "lucide-react";
 import { format } from "date-fns";
-import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils"; // Corrected import
+import { Link, useNavigate } from "react-router-dom";
+import { createPageUrl } from "@/utils/index";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 export default function History() {
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const { data: analyses, isLoading: loading, refetch } = useQuery({
         queryKey: ['analyses-history'],
-        // Use the local backend client to list VideoAnalysis
-        queryFn: () => base44.entities.VideoAnalysis.list('-created_date', 20),
-        initialData: []
+        queryFn: () => base44.entities.VideoAnalysis.list({ sort: '-created_date', limit: 20 }),
+        initialData: [],
+        refetchOnWindowFocus: true,
     });
 
     const getStatusColor = (status) => {
@@ -114,8 +115,7 @@ export default function History() {
                                             {format(new Date(analysis.created_date), 'MMM d, yyyy • h:mm a')}
                                         </p>
                                     </CardHeader>
-
-                                    s         <CardContent className="space-y-4 p-4 pt-0">
+                                    <CardContent className="space-y-4 p-4 pt-0">
                                         <div className="flex items-center justify-between text-sm">
                                             <div className="flex items-center gap-2 text-gray-300">
                                                 <Clock className="w-4 h-4" />
@@ -128,13 +128,13 @@ export default function History() {
                                                 </div>
                                             )}
                                         </div>
-
                                         <div className="flex gap-2">
                                             {analysis.analysis_status === 'completed' && (
                                                 <>
                                                     <Button
-                                                        s size="sm"
+                                                        size="sm"
                                                         className="flex-1 bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white"
+                                                        onClick={() => navigate(createPageUrl('Dashboard', { analysisId: analysis.id }))}
                                                     >
                                                         <Play className="w-4 h-4 mr-2" />
                                                         View
@@ -142,7 +142,7 @@ export default function History() {
                                                     <Button size="sm" variant="outline" className="border-white/20 hover:bg-white/5 text-white">
                                                         <Download className="w-4 h-4" />
                                                     </Button>
-                                                    s                     </>
+                                                </>
                                             )}
                                             {analysis.analysis_status !== 'completed' && (
                                                 <Button size="sm" disabled className="flex-1 bg-gray-600 text-white">
@@ -150,7 +150,7 @@ export default function History() {
                                                 </Button>
                                             )}
                                             <Button
-                                                size="sm" // Use a small icon button
+                                                size="sm"
                                                 variant="ghost"
                                                 className="text-red-500/70 hover:bg-red-500/10 hover:text-red-400"
                                                 onClick={() => handleDelete(analysis.id)}

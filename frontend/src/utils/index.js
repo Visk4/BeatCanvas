@@ -7,17 +7,30 @@ export function cn(...inputs) {
 }
 
 // This mimics the createPageUrl function
-export const createPageUrl = (pageName) => {
+export const createPageUrl = (pageName, params = {}) => {
+    let url;
     switch (pageName) {
         case 'Dashboard':
-            return '/dashboard';
+            url = '/dashboard';
+            break;
         case 'CreateVideo':
-            return '/createvideo';
+            url = '/createvideo';
+            break;
         case 'Templates':
-            return '/templates';
+            url = '/templates';
+            break;
         case 'History':
-            return '/history';
+            url = '/history';
+            break;
         default:
-            return '/';
+            url = '/';
+            break;
     }
+
+    if (params && Object.keys(params).length > 0) {
+        const query = new URLSearchParams(params).toString();
+        url += `?${query}`;
+    }
+
+    return url;
 };
