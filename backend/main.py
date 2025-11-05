@@ -12,7 +12,8 @@ from fastapi.staticfiles import StaticFiles
 import tasks # Import your tasks file
 
 # --- Configuration ---
-MONGO_URI = "mongodb://localhost:27017/"
+# Load from environment variable for security, with a fallback for local dev
+MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
 # Get the absolute path of the directory where main.py is located
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # Create an absolute path for the 'uploads' directory
