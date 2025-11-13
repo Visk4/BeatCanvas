@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import VideoUploader from "../../components/VideoUploader";
-import VideoPlayer from "../../components/VideoPlayer";
-import TransitionResults from "../../components/TransitionResults";
-import AnalysisProgress from "../../components/AnalysisProgress";
-import HeadphonesScene from "../../components/HeadphonesScene";
-import { Button } from "../../components/ui/button";
+import VideoUploader from "@/components/VideoUploader";
+import VideoPlayer from "@/components/VideoPlayer";
+import TransitionResults from "@/components/TransitionResults";
+import AnalysisProgress from "@/components/AnalysisProgress";
+import HeadphonesScene from "@/components/HeadphonesScene";
+import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
     const [currentAnalysis, setCurrentAnalysis] = useState(null);

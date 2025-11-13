@@ -5,6 +5,8 @@ import Dashboard from './pages/Dashboard.jsx';
 import CreateVideo from './pages/CreateVideo.jsx';
 import History from './pages/History.jsx';
 import Templates from './pages/Templates.jsx';
+import Login from './pages/Login.jsx';
+import Register from './pages/Register.jsx';
 
 // This simple helper can live inside App.jsx
 const createPageUrl = (pageName) => {
@@ -17,6 +19,10 @@ const createPageUrl = (pageName) => {
             return '/templates';
         case 'History':
             return '/history';
+        case 'Login':
+            return '/login';
+        case 'Register':
+            return '/register';
         default:
             return '/';
     }
@@ -29,6 +35,8 @@ function App() {
         if (pathname.startsWith('/createvideo')) return 'CreateVideo';
         if (pathname.startsWith('/templates')) return 'Templates';
         if (pathname.startsWith('/history')) return 'History';
+        if (pathname.startsWith('/login')) return 'Login';
+        if (pathname.startsWith('/register')) return 'Register';
         return 'Dashboard';
     };
 
@@ -40,6 +48,8 @@ function App() {
                 <Route path="/createvideo" element={<CreateVideo />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/templates" element={<Templates />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
             </Routes>
         </Layout>
     );

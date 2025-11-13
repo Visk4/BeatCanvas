@@ -1,6 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Film, Scissors, History, Settings, User } from "lucide-react";
+import { Film, Scissors, History, Settings } from "lucide-react";
+import { getToken, clearToken } from "@/api/client";
 
 export default function Layout({ children, currentPageName, createPageUrl }) {
     const location = useLocation();
@@ -54,8 +55,8 @@ export default function Layout({ children, currentPageName, createPageUrl }) {
                                     key={item.title}
                                     to={item.url}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${location.pathname === item.url
-                                            ? 'bg-slate-800 text-white'
-                                            : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
+                                        ? 'bg-slate-800 text-white'
+                                        : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                                         }`}
                                 >
                                     <item.icon className="w-4 h-4" />
@@ -65,9 +66,19 @@ export default function Layout({ children, currentPageName, createPageUrl }) {
                         </nav>
 
                         <div className="flex items-center gap-3">
-                            <button className="w-9 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 flex items-center justify-center text-slate-400 hover:text-white transition-all">
-                                <User className="w-4 h-4" />
-                            </button>
+                            {getToken() ? (
+                                <button
+                                    onClick={() => { clearToken(); window.location.href = createPageUrl('Login'); }}
+                                    className="px-3 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-sm"
+                                >
+                                    Logout
+                                </button>
+                            ) : (
+                                <>
+                                    <Link to={createPageUrl('Login')} className="px-3 h-9 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-all text-sm flex items-center">Login</Link>
+                                    <Link to={createPageUrl('Register')} className="px-3 h-9 rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-all text-sm flex items-center">Register</Link>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>

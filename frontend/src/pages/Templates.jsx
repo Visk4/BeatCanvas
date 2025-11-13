@@ -5,12 +5,12 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Plus, Edit, Trash2, Clock, Zap, Search } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Card, CardContent } from "../../components/ui/card";
-import { Badge } from "../../components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
-import TemplateEditorModal from "../../components/templates/Templates";
+import TemplateEditorModal from "@/components/templates/Templates";
 
 export default function Templates() {
     const [searchQuery, setSearchQuery] = useState("");

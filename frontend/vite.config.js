@@ -15,8 +15,9 @@ export default defineConfig({
             '@': path.resolve(__dirname, './src'),
         },
     },
+    extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
     server: {
         port: 5173 
     }
 })
-
+console.log("Resolved alias path:", path.resolve(__dirname, './src'))

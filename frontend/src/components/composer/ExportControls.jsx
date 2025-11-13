@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, CardContent } from "../ui/card";
 import { Button } from "../ui/button";
 import { Download, Sparkles } from "lucide-react";
-import { base44 } from "../../src/api/client";
+import { base44 } from "@/api/client";
 import { motion } from "framer-motion";
 
 export default function ExportControls({ template, content, beatAnalysis, onComposeStart, onComposeEnd, composedVideoUrl, isComposing }) {

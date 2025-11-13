@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Play, Pause, Volume2, VolumeX } from "lucide-react";
-import { cn } from "../src/utils"; // Adjust relative path if needed
+import { cn } from "@/utils"; // Adjust relative path if needed
 
 // Helper: get confidence color for badge styling
 const getConfidenceColor = (confidence) => {

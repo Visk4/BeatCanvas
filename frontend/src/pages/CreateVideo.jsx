@@ -5,13 +5,13 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { ArrowLeft, Sparkles } from "lucide-react";
-import { Button } from "../../components/ui/button";
-import TemplateSelector from "../../components/composer/TemplateSelector";
-import ContentUploader from "../../components/composer/ContentUploader";
-import BeatDetector from "../../components/composer/BeatDetector";
-import TransitionCorrelation from "../../components/composer/TransitionCorrelation";
-import VideoPreview from "../../components/composer/VideoPreview";
-import ExportControls from "../../components/composer/ExportControls";
+import { Button } from "@/components/ui/button";
+import TemplateSelector from "@/components/composer/TemplateSelector";
+import ContentUploader from "@/components/composer/ContentUploader";
+import BeatDetector from "@/components/composer/BeatDetector";
+import TransitionCorrelation from "@/components/composer/TransitionCorrelation";
+import VideoPreview from "@/components/composer/VideoPreview";
+import ExportControls from "@/components/composer/ExportControls";
 
 export default function CreateVideo() {
     const [selectedTemplate, setSelectedTemplate] = useState(null);

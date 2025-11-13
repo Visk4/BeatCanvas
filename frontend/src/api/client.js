@@ -10,6 +10,22 @@ const client = axios.create({
     },
 });
 
+// ---- Auth token handling ----
+export const authTokenKey = "bc_auth_token";
+
+export const getToken = () => localStorage.getItem(authTokenKey);
+export const setToken = (token) => localStorage.setItem(authTokenKey, token);
+export const clearToken = () => localStorage.removeItem(authTokenKey);
+
+client.interceptors.request.use((config) => {
+    const token = getToken();
+    if (token) {
+        config.headers = config.headers || {};
+        config.headers["Authorization"] = `Bearer ${token}`;
+    }
+    return config;
+});
+
 // --- Helper Functions to mimic Base 44 ---
 
 // Mimics base44.integrations.Core.UploadFile
@@ -80,6 +96,25 @@ export const base44 = {
     integrations: {
         Core: Core,
     },
+    auth: {
+        async register({ email, password }) {
+            const { data } = await client.post(`/auth/register`, { email, password });
+            if (data?.access_token) setToken(data.access_token);
+            return data;
+        },
+        async login({ email, password }) {
+            const { data } = await client.post(`/auth/login`, { email, password });
+            if (data?.access_token) setToken(data.access_token);
+            return data;
+        },
+        async me() {
+            const { data } = await client.get(`/auth/me`);
+            return data;
+        },
+        logout() {
+            clearToken();
+        }
+    }
 };
 
 // Export the raw client for our new logic

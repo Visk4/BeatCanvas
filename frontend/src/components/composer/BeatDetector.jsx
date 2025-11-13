@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Music, Upload, Zap, X, Activity } from "lucide-react";
 import { motion } from "framer-motion";
-import client from "../../src/api/client"; // Use the raw client
+import client from "@/api/client"; // Use the raw client
 
 export default function BeatDetector({ onBeatsDetected, onAudioFileChange }) {
     const [audioFile, setAudioFile] = useState(null);
