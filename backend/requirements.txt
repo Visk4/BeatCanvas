@@ -1,8 +1,22 @@
+# Build dependencies first
+Cython
+numpy==1.26.4
+
+# Core dependencies
 fastapi
 uvicorn[standard]
-motor
-pymongo
+motor==3.3.2
+pymongo==4.6.0
 python-multipart
+python-dotenv
+email-validator
+certifi
+
+# Audio/video processing (requires Cython+NumPy)
 madmom
 opencv-python-headless
-numpy==1.23
+
+# Auth dependencies
+passlib[bcrypt]
+python-jose
+bcrypt==4.0.1

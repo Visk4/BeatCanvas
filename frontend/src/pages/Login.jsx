@@ -56,7 +56,7 @@ export default function Login() {
                             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required placeholder="••••••••" className="mt-1 bg-slate-800 border-slate-700 text-white" />
                         </div>
                         {error && <p className="text-sm text-red-400">{error}</p>}
-                        <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600">
+                        <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 text-white font-semibold">
                             {loading ? 'Signing in...' : 'Sign In'}
                         </Button>
                     </form>

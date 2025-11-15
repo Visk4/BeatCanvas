@@ -3,10 +3,7 @@
 @tailwind utilities;
 
 /* Custom scrollbar for a matte finish */
-body {
-    color: #cbd5e1;
-    /* slate-300 */
-}
+/* Removed global body color to avoid overriding MiniProject theme */
 
 ::-webkit-scrollbar {
     width: 8px;

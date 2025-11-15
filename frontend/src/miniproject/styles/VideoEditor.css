@@ -1,0 +1,533 @@
+/* ======= MAIN CONTAINER ======= */
+.editor-container {
+    background-color: #0a0a0a;
+    min-height: 100vh;
+    color: #ffffff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ======= NAVBAR ======= */
+.editor-navbar {
+    background-color: #1a1a1a;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #2a2a2a;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.editor-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.nav-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-outline {
+    background-color: transparent;
+    color: #fff;
+    border: 1px solid #444;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-outline:hover {
+    background-color: #fff;
+    color: #000;
+}
+
+/* ======= LAYOUT ======= */
+.editor-workspace {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+/* ======= SIDEBAR ======= */
+.editor-sidebar {
+    background-color: #151515;
+    width: 200px;
+    padding: 1.5rem 1rem;
+    border-right: 1px solid #2a2a2a;
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.sidebar-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #888;
+    margin-bottom: 0.75rem;
+    margin-top: 0;
+}
+
+.tool-btn,
+.action-btn {
+    width: 100%;
+    background-color: #1a1a1a;
+    color: #fff;
+    border: 1px solid #333;
+    padding: 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s;
+    text-align: left;
+}
+
+.tool-btn.active {
+    background-color: #2a4a8a;
+    border-color: #4a90e2;
+}
+
+.tool-btn:hover,
+.action-btn:hover {
+    background-color: #222;
+}
+
+.divider {
+    height: 1px;
+    background-color: #2a2a2a;
+    margin: 1.5rem 0;
+}
+
+/* ======= ZOOM CONTROLS ======= */
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: space-between;
+}
+
+.zoom-btn {
+    background-color: #1a1a1a;
+    color: #fff;
+    border: 1px solid #333;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.zoom-text {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+/* ======= MAIN CONTENT ======= */
+.editor-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ======= PREVIEW SECTION ======= */
+.preview-section {
+    padding: 2rem;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.preview-box {
+    background-color: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    border: 1px solid #2a2a2a;
+    aspect-ratio: 16/9;
+    max-width: 800px;
+    margin-inline: auto;
+}
+
+.preview-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.waveform {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.preview-text {
+    font-size: 1.2rem;
+    margin: 0.5rem 0;
+    color: #fff;
+}
+
+.preview-subtext {
+    font-size: 0.9rem;
+    color: #888;
+    margin: 0;
+}
+
+/* ======= AUDIO CONTROLS ======= */
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.ctrl-btn {
+    background-color: #2a2a2a;
+    color: #fff;
+    border: none;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.ctrl-btn:hover {
+    background-color: #3a3a3a;
+}
+
+.btn-play {
+    background-color: #4a90e2;
+    color: #fff;
+    border: none;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+}
+
+.btn-play:hover {
+    background-color: #5aa1f2;
+}
+
+.time-display {
+    font-size: 1rem;
+    color: #aaa;
+    font-family: monospace;
+    min-width: 140px;
+    text-align: center;
+}
+
+/* ======= TIMELINE ======= */
+.timeline-section {
+    flex: 1;
+    padding: 1.5rem 2rem;
+    overflow: auto;
+    background-color: #0f0f0f;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.timeline-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.timeline-info {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+.selected-info {
+    color: #4a90e2;
+}
+
+.timeline-container {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    padding: 1rem;
+    border: 1px solid #2a2a2a;
+    min-height: 200px;
+    position: relative;
+    cursor: pointer;
+}
+
+.timeline-ruler {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.ruler-mark {
+    text-align: center;
+    flex: 1;
+}
+
+.ruler-label {
+    font-size: 0.75rem;
+    color: #666;
+    font-family: monospace;
+}
+
+.timeline-track {
+    position: relative;
+    height: 80px;
+    background-color: #0f0f0f;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+}
+
+/* ======= SEGMENTS ======= */
+.segment {
+    position: absolute;
+    top: 10px;
+    height: 60px;
+    border-radius: 4px;
+    cursor: move;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.segment.selected {
+    border: 2px solid #fff;
+    transform: scale(1.02);
+}
+
+.segment-name {
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    user-select: none;
+}
+
+/* ======= PLAYHEAD ======= */
+.playhead {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.playhead-line {
+    width: 2px;
+    height: 100%;
+    background-color: #ff4444;
+    box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+}
+
+.playhead-top {
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    width: 14px;
+    height: 14px;
+    background-color: #ff4444;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+}
+
+/* ======= TRACK LABELS ======= */
+.track-labels {
+    margin-top: 1rem;
+}
+
+.track-label {
+    background-color: #1a1a1a;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    border: 1px solid #2a2a2a;
+}
+
+.timeline-track {
+    position: relative;
+    height: 100px;
+    background-color: #111;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.segment:hover .resize-handle {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.segment:hover .segment-media-preview img {
+    opacity: 1;
+}
+
+/* ======= RESPONSIVE ======= */
+@media (max-width: 768px) {
+    .editor-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    .editor-workspace {
+        flex-direction: column;
+    }
+
+    .preview-box {
+        max-width: 100%;
+    }
+}
+
+/* ======= PHOTO POOL ======= */
+.photo-pool {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    gap: 8px;
+    margin-bottom: 1rem;
+}
+
+.pool-photo {
+    width: 100%;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #333;
+    cursor: grab;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.pool-photo:hover {
+    transform: scale(1.05);
+    border-color: #4a90e2;
+}
+
+/* ======= SEGMENT MEDIA PREVIEW ======= */
+.segment-media-preview {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    border-radius: 4px;
+}
+
+.segment-media-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.segment-media-preview img:hover {
+    opacity: 1;
+}
+
+/* ======= RESIZE HANDLE ======= */
+.resize-handle {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 6px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.2);
+    cursor: ew-resize;
+    transition: background 0.2s;
+}
+
+.resize-handle:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+/* ======= SEGMENT BODY ======= */
+.segment-body {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* ======= SEGMENT TIMES ======= */
+.segment-times {
+    position: absolute;
+    bottom: 2px;
+    left: 4px;
+    font-size: 0.7rem;
+    color: #ddd;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.6);
+    z-index: 3;
+}
+
+/* ======= PREVIEW "Replace Media" BUTTON ======= */
+.preview-content button {
+    background: #4a90e2;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+.preview-content button:hover {
+    background: #5aa1f2;
+}
+
+/* ======= DRAGGING VISUAL FEEDBACK ======= */
+.segment.dragging {
+    opacity: 0.7;
+    outline: 2px dashed #4a90e2;
+}
+
+.segment.resizing {
+    border-color: #4a90e2;
+}
+
+/* ======= PHOTO POOL EMPTY STATE ======= */
+.photo-pool>div {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.85rem;
+    color: #666;
+}

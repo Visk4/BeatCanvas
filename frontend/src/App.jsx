@@ -1,58 +1,37 @@
 import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
-import Layout from './layout/main.jsx';
-import Dashboard from './pages/Dashboard.jsx';
-import CreateVideo from './pages/CreateVideo.jsx';
-import History from './pages/History.jsx';
-import Templates from './pages/Templates.jsx';
+import { Routes, Route } from 'react-router-dom';
+
+// Keep auth pages available
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 
-// This simple helper can live inside App.jsx
-const createPageUrl = (pageName) => {
-    switch (pageName) {
-        case 'Dashboard':
-            return '/dashboard';
-        case 'CreateVideo':
-            return '/createvideo';
-        case 'Templates':
-            return '/templates';
-        case 'History':
-            return '/history';
-        case 'Login':
-            return '/login';
-        case 'Register':
-            return '/register';
-        default:
-            return '/';
-    }
-};
+// New MiniProject UI (now the primary app UI)
+import MPHome from './miniproject/pages/Home.jsx';
+import MPDashboard from './miniproject/pages/Dashboard.jsx';
+import MPTemplateExtraction from './miniproject/pages/TemplateExtraction.jsx';
+import MPBeatDetection from './miniproject/pages/BeatDetection.jsx';
+import MPVideoEditor from './miniproject/pages/VideoEditor.jsx';
+import MPHistory from './miniproject/pages/History.jsx';
+import MPComposer from './miniproject/pages/Composer.jsx';
 
-function App() {
-    const location = useLocation();
-
-    const getPageName = (pathname) => {
-        if (pathname.startsWith('/createvideo')) return 'CreateVideo';
-        if (pathname.startsWith('/templates')) return 'Templates';
-        if (pathname.startsWith('/history')) return 'History';
-        if (pathname.startsWith('/login')) return 'Login';
-        if (pathname.startsWith('/register')) return 'Register';
-        return 'Dashboard';
-    };
-
+export default function App() {
+    // Override previous UI: wire the new MiniProject pages as the primary routes
     return (
-        <Layout currentPageName={getPageName(location.pathname)} createPageUrl={createPageUrl}>
-            <Routes>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/createvideo" element={<CreateVideo />} />
-                <Route path="/history" element={<History />} />
-                <Route path="/templates" element={<Templates />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-            </Routes>
-        </Layout>
+        <Routes>
+            {/* New default landing page */}
+            <Route path="/" element={<MPHome />} />
+
+            {/* MiniProject app routes */}
+            <Route path="/dashboard" element={<MPDashboard />} />
+            <Route path="/template-extraction" element={<MPTemplateExtraction />} />
+            <Route path="/beat-detection" element={<MPBeatDetection />} />
+            <Route path="/video-editor" element={<MPVideoEditor />} />
+            <Route path="/history" element={<MPHistory />} />
+            <Route path="/composer" element={<MPComposer />} />
+
+            {/* Keep auth routes accessible */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+        </Routes>
     );
 }
-
-export default App;

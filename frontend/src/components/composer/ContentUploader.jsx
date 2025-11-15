@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Upload, Image, Video, X, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import UserImageGallery from "../UserImageGallery";
 
 export default function ContentUploader({ requiredImages, uploadedContent, onContentChange }) {
     const [uploadMode, setUploadMode] = useState("images"); // 'images' or 'video'
@@ -17,6 +18,13 @@ export default function ContentUploader({ requiredImages, uploadedContent, onCon
             ...uploadedContent,
             images: [...uploadedContent.images, ...imageUrls].slice(0, requiredImages),
             imageFiles: [...(uploadedContent.imageFiles || []), ...files].slice(0, requiredImages),
+        });
+    };
+
+    const handleGalleryImageSelect = (imageUrl) => {
+        onContentChange({
+            ...uploadedContent,
+            images: [...uploadedContent.images, imageUrl].slice(0, requiredImages),
         });
     };
 
@@ -88,14 +96,22 @@ export default function ContentUploader({ requiredImages, uploadedContent, onCon
                 {/* Images upload */}
                 {uploadMode === "images" && (
                     <div className="space-y-4">
-                        <Button
-                            onClick={() => imageInputRef.current?.click()}
-                            disabled={uploadedContent.images.length >= requiredImages}
-                            className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 disabled:opacity-50 text-white"
-                        >
-                            <Image className="w-4 h-4 mr-2" />
-                            Select Images ({uploadedContent.images.length}/{requiredImages})
-                        </Button>
+                        <div className="grid grid-cols-2 gap-2">
+                            <Button
+                                onClick={() => imageInputRef.current?.click()}
+                                disabled={uploadedContent.images.length >= requiredImages}
+                                className="w-full bg-gradient-to-r from-purple-500 to-cyan-500 hover:from-purple-600 hover:to-cyan-600 disabled:opacity-50 text-white"
+                            >
+                                <Image className="w-4 h-4 mr-2" />
+                                Upload Images
+                            </Button>
+
+                            <UserImageGallery onSelectImage={handleGalleryImageSelect} />
+                        </div>
+
+                        <div className="text-center text-sm text-white/70">
+                            {uploadedContent.images.length}/{requiredImages} images selected
+                        </div>
 
                         <input
                             ref={imageInputRef}
