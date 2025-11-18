@@ -40,6 +40,7 @@ export default function VideoPlayer({
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(1);
     const [isMuted, setIsMuted] = useState(false);
+    const [hasError, setHasError] = useState(false);
     const videoRef = useRef(null);
 
     // Seek to a selected timestamp
@@ -163,16 +164,33 @@ export default function VideoPlayer({
                         onPlay={() => setIsPlaying(true)}
                         onPause={() => setIsPlaying(false)}
                         onEnded={() => setIsPlaying(false)}
+                        onError={() => setHasError(true)}
                         playsInline
                         preload="metadata"
                         key={analysis?.video_url}
                     />
 
+                    {/* Error Message */}
+                    {hasError && (
+                        <div className="absolute inset-0 bg-black/90 flex items-center justify-center p-6">
+                            <div className="text-center max-w-md">
+                                <div className="text-6xl mb-4">⚠️</div>
+                                <h3 className="text-white text-lg font-semibold mb-2">Video Not Available</h3>
+                                <p className="text-gray-400 text-sm mb-4">
+                                    This video was uploaded before the storage system migration and is no longer available.
+                                </p>
+                                <p className="text-gray-500 text-xs">
+                                    Please re-upload your video to analyze it again.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Overlay Play Button */}
                     <div
                         className={`absolute inset-0 bg-black/50 transition-opacity duration-300 flex items-center justify-center pointer-events-none ${!isPlaying
-                                ? "opacity-100"
-                                : "opacity-0 group-hover:opacity-100"
+                            ? "opacity-100"
+                            : "opacity-0 group-hover:opacity-100"
                             }`}
                     >
                         <div

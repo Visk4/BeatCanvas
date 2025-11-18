@@ -2,8 +2,8 @@
 
 .beat-detection-page {
     min-height: 100vh;
-    background-color: white;
-    color: black;
+    background-color: transparent;
+    color: white;
     padding: 120px 80px 80px;
     /* top padding to avoid navbar overlap */
     font-family: 'Poppins', sans-serif;
@@ -23,7 +23,7 @@
 
 .beat-header p {
     font-size: 1.1rem;
-    color: #555;
+    color: rgba(255, 255, 255, 0.8);
     max-width: 700px;
     margin: 0 auto;
 }
@@ -36,16 +36,18 @@
     justify-content: center;
     gap: 25px;
     margin-bottom: 60px;
-    background-color: #fafafa;
-    border: 2px dashed #ccc;
+    background-color: rgba(31, 41, 55, 0.6);
+    backdrop-filter: blur(10px);
+    border: 2px dashed rgba(255, 255, 255, 0.3);
     border-radius: 16px;
     padding: 60px 40px;
     transition: all 0.3s ease;
+    pointer-events: auto;
 }
 
 .upload-section:hover {
-    border-color: black;
-    background-color: #fff;
+    border-color: rgba(255, 255, 255, 0.6);
+    background-color: rgba(31, 41, 55, 0.8);
 }
 
 .upload-section input[type="file"] {
@@ -53,22 +55,23 @@
 }
 
 .upload-label {
-    border: 2px solid black;
+    border: 2px solid white;
     padding: 12px 24px;
     border-radius: 8px;
     font-weight: 600;
-    background-color: white;
+    background-color: transparent;
+    color: white;
     cursor: pointer;
     transition: all 0.2s ease;
 }
 
 .upload-label:hover {
-    background-color: black;
-    color: white;
+    background-color: white;
+    color: black;
 }
 
 .file-name {
-    color: #333;
+    color: rgba(255, 255, 255, 0.9);
     font-size: 0.95rem;
     font-weight: 500;
 }
@@ -93,11 +96,12 @@
     gap: 25px;
     margin-top: 50px;
     flex-wrap: wrap;
+    pointer-events: auto;
 }
 
 .btn-black {
-    background-color: black;
-    color: white;
+    background-color: white;
+    color: black;
     border: none;
     padding: 12px 26px;
     border-radius: 10px;
@@ -107,13 +111,13 @@
 }
 
 .btn-black:hover {
-    background-color: #333;
+    background-color: rgba(255, 255, 255, 0.9);
 }
 
 .btn-outline {
-    border: 2px solid black;
-    background-color: white;
-    color: black;
+    border: 2px solid white;
+    background-color: transparent;
+    color: white;
     padding: 12px 26px;
     border-radius: 10px;
     font-weight: 600;
@@ -122,17 +126,19 @@
 }
 
 .btn-outline:hover {
-    background-color: black;
-    color: white;
+    background-color: white;
+    color: black;
 }
 
 /* Beat Visualization Section */
 .beat-visualization {
     margin-top: 80px;
-    background-color: #fafafa;
+    background-color: rgba(31, 41, 55, 0.6);
+    backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 50px 40px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    pointer-events: auto;
 }
 
 .beat-visualization h2 {
@@ -143,7 +149,7 @@
 .waveform {
     height: 180px;
     width: 100%;
-    background-color: #e5e5e5;
+    background-color: rgba(17, 24, 39, 0.5);
     border-radius: 12px;
     overflow: hidden;
     position: relative;
@@ -165,7 +171,7 @@
 .beat-footer {
     margin-top: 100px;
     font-size: 0.9rem;
-    color: #888;
+    color: rgba(255, 255, 255, 0.6);
 }
 
 /* Responsive Design */

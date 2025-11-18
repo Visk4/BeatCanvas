@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 // Keep auth pages available
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
+import OAuthCallback from './pages/OAuthCallback.jsx';
 
 // New MiniProject UI (now the primary app UI)
 import MPHome from './miniproject/pages/Home.jsx';
@@ -32,6 +33,7 @@ export default function App() {
             {/* Keep auth routes accessible */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/auth/callback" element={<OAuthCallback />} />
         </Routes>
     );
 }

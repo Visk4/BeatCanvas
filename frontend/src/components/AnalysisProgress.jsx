@@ -81,17 +81,6 @@ export default function AnalysisProgress({ analysis, onComplete }) {
             </CardHeader>
 
             <CardContent className="space-y-6">
-                <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                        <span className="text-gray-300">Progress</span>
-                        <span className="text-white font-mono">{Math.round(progress)}%</span>
-                    </div>
-                    <Progress
-                        value={progress}
-                        className="h-2" // Removed bg-white/10 to use default
-                    />
-                </div>
-
                 <div className="space-y-4">
                     {steps.map((step, index) => {
                         const StepIcon = step.icon;
@@ -102,22 +91,22 @@ export default function AnalysisProgress({ analysis, onComplete }) {
                             <motion.div
                                 key={index}
                                 className={`flex items-center gap-4 p-3 rounded-lg transition-all duration-300 ${isActive ? 'bg-purple-500/20 border border-purple-500/30' :
-                                        isCompleted ? 'bg-green-500/10 border border-green-500/20 opacity-70' :
-                                            'bg-white/5 border border-white/10 opacity-50'
+                                    isCompleted ? 'bg-green-500/10 border border-green-500/20 opacity-70' :
+                                        'bg-white/5 border border-white/10 opacity-50'
                                     }`}
                                 animate={isActive ? { scale: [1, 1.02, 1] } : { scale: 1 }}
                                 transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
                             >
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${isActive ? 'bg-purple-500/30 text-purple-300' :
-                                        isCompleted ? 'bg-green-500/30 text-green-300' :
-                                            'bg-white/10 text-gray-400'
+                                    isCompleted ? 'bg-green-500/30 text-green-300' :
+                                        'bg-white/10 text-gray-400'
                                     }`}>
                                     <StepIcon className="w-5 h-5" />
                                 </div>
                                 <div>
                                     <p className={`font-medium ${isActive ? 'text-purple-300' :
-                                            isCompleted ? 'text-green-300' :
-                                                'text-gray-300'
+                                        isCompleted ? 'text-green-300' :
+                                            'text-gray-300'
                                         }`}>
                                         {step.label}
                                     </p>

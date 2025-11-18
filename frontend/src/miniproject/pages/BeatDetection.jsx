@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import "../styles/BeatDetection.css";
 import UserProfile from "../../components/UserProfile";
+import Particles from "../../components/Particles";
 import { useNavigate, Link } from "react-router-dom";
 
 export default function BeatDetection() {
@@ -74,89 +75,115 @@ export default function BeatDetection() {
     };
 
     return (
-        <div className="beat-detection-page">
-            <nav style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '20px 60px',
-                borderBottom: '1px solid #374151',
-                backgroundColor: '#111827'
+        <div style={{ position: 'relative', minHeight: '100vh' }}>
+            {/* Particles Background */}
+            <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                zIndex: 0
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'white', margin: 0 }}>Beat Detection</h2>
-                    <div style={{ display: 'flex', gap: '20px' }}>
-                        <Link to="/dashboard" style={{ color: '#9ca3af', textDecoration: 'none', fontWeight: '500' }}>Dashboard</Link>
-                        <Link to="/template-extraction" style={{ color: '#9ca3af', textDecoration: 'none', fontWeight: '500' }}>Templates</Link>
-                        <Link to="/composer" style={{ color: '#9ca3af', textDecoration: 'none', fontWeight: '500' }}>Composer</Link>
+                <Particles
+                    particleColors={['#5227FF', '#ffffff', '#8b5cf6']}
+                    particleCount={200}
+                    particleSpread={10}
+                    speed={0.1}
+                    particleBaseSize={100}
+                    moveParticlesOnHover={true}
+                    alphaParticles={false}
+                    disableRotation={false}
+                />
+            </div>
+
+            {/* Content */}
+            <div className="beat-detection-page" style={{ position: 'relative', zIndex: 1, pointerEvents: 'none' }}>
+                <nav style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '20px 60px',
+                    borderBottom: '1px solid rgba(55, 65, 81, 0.5)',
+                    backgroundColor: 'rgba(17, 24, 39, 0.5)',
+                    backdropFilter: 'blur(10px)',
+                    pointerEvents: 'auto'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'white', margin: 0 }}>Beat Detection</h2>
+                        <div style={{ display: 'flex', gap: '20px' }}>
+                            <Link to="/dashboard" style={{ color: '#9ca3af', textDecoration: 'none', fontWeight: '500' }}>Dashboard</Link>
+                            <Link to="/template-extraction" style={{ color: '#9ca3af', textDecoration: 'none', fontWeight: '500' }}>Templates</Link>
+                            <Link to="/composer" style={{ color: '#9ca3af', textDecoration: 'none', fontWeight: '500' }}>Composer</Link>
+                        </div>
                     </div>
+                    <UserProfile />
+                </nav>
+
+                <div className="beat-header" style={{ pointerEvents: 'auto' }}>
+                    <h1>Beat Detection</h1>
+                    <p>
+                        Upload an audio file to detect cinematic beats and create timestamped photo blocks for video syncing.
+                    </p>
                 </div>
-                <UserProfile />
-            </nav>
 
-            <div className="beat-header">
-                <h1>Beat Detection</h1>
-                <p>
-                    Upload an audio file to detect cinematic beats and create timestamped photo blocks for video syncing.
-                </p>
-            </div>
+                <div className="upload-section">
+                    <label htmlFor="audioUpload" className="upload-label">
+                        {audioFile ? "Replace Audio File" : "Upload Audio File"}
+                    </label>
+                    <input id="audioUpload" type="file" accept="audio/*" onChange={handleAudioUpload} />
+                    {audioFile && <p className="file-name">🎵 {audioFile.name}</p>}
+                </div>
 
-            <div className="upload-section">
-                <label htmlFor="audioUpload" className="upload-label">
-                    {audioFile ? "Replace Audio File" : "Upload Audio File"}
-                </label>
-                <input id="audioUpload" type="file" accept="audio/*" onChange={handleAudioUpload} />
-                {audioFile && <p className="file-name">🎵 {audioFile.name}</p>}
-            </div>
-
-            <div className="action-buttons">
-                <button className="btn-black" onClick={handleBeatDetection}>
-                    {loading ? "Analyzing..." : "Detect Beats"}
-                </button>
-                {beatData && (
-                    <button className="btn-outline" onClick={handleGoToEditor}>
-                        Proceed to Video Editor →
+                <div className="action-buttons">
+                    <button className="btn-black" onClick={handleBeatDetection}>
+                        {loading ? "Analyzing..." : "Detect Beats"}
                     </button>
-                )}
-            </div>
-
-            {beatData && (
-                <div className="beat-blocks-section">
-                    <h2>Detected Beat Blocks</h2>
-                    <div className="beat-blocks-container">
-                        {beatData.beats.map((beat, idx) => (
-                            <div key={idx} className="beat-block" onClick={() => fileInputs.current[idx]?.click()}>
-                                {blockImages[idx] ? (
-                                    <img src={blockImages[idx]} alt={`Block ${idx}`} />
-                                ) : (
-                                    <span className="add-icon">+</span>
-                                )}
-                                <p className="timestamp">{beat.toFixed(2)}s</p>
-                                <input
-                                    type="file"
-                                    accept="image/*,video/*"
-                                    ref={(el) => (fileInputs.current[idx] = el)}
-                                    style={{ display: 'none' }}
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            const imageUrl = URL.createObjectURL(file);
-                                            setBlockImages((prev) => ({ ...prev, [idx]: imageUrl }));
-                                        }
-                                    }}
-                                />
-                            </div>
-                        ))}
-                    </div>
-
-                    <div style={{ textAlign: 'center', marginTop: 12 }}>
-                        <label htmlFor="allPhotos" className="add-all-btn">Add Photos to Pool</label>
-                        <input id="allPhotos" type="file" accept="image/*,video/*" multiple style={{ display: 'none' }} onChange={handleBlockImageUpload} />
-                    </div>
+                    {beatData && (
+                        <button className="btn-outline" onClick={handleGoToEditor}>
+                            Proceed to Video Editor →
+                        </button>
+                    )}
                 </div>
-            )}
 
-            <div className="beat-footer">© 2025 BeatCanvas | Audio Sync Engine</div>
+                {beatData && (
+                    <div className="beat-blocks-section" style={{ pointerEvents: 'auto' }}>
+                        <h2>Detected Beat Blocks</h2>
+                        <div className="beat-blocks-container">
+                            {beatData.beats.map((beat, idx) => (
+                                <div key={idx} className="beat-block" onClick={() => fileInputs.current[idx]?.click()}>
+                                    {blockImages[idx] ? (
+                                        <img src={blockImages[idx]} alt={`Block ${idx}`} />
+                                    ) : (
+                                        <span className="add-icon">+</span>
+                                    )}
+                                    <p className="timestamp">{beat.toFixed(2)}s</p>
+                                    <input
+                                        type="file"
+                                        accept="image/*,video/*"
+                                        ref={(el) => (fileInputs.current[idx] = el)}
+                                        style={{ display: 'none' }}
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                const imageUrl = URL.createObjectURL(file);
+                                                setBlockImages((prev) => ({ ...prev, [idx]: imageUrl }));
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+
+                        <div style={{ textAlign: 'center', marginTop: 12 }}>
+                            <label htmlFor="allPhotos" className="add-all-btn">Add Photos to Pool</label>
+                            <input id="allPhotos" type="file" accept="image/*,video/*" multiple style={{ display: 'none' }} onChange={handleBlockImageUpload} />
+                        </div>
+                    </div>
+                )}
+
+                <div className="beat-footer" style={{ pointerEvents: 'auto' }}>© 2025 BeatCanvas | Audio Sync Engine</div>
+            </div>
         </div>
     );
 }

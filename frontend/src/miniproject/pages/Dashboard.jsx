@@ -4,6 +4,7 @@ import { base44 } from "../../api/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import UserProfile from "../../components/UserProfile";
+import Cubes from "../../components/Cubes";
 import "../styles/Dashboard.css";
 
 export default function Dashboard() {
@@ -153,251 +154,275 @@ export default function Dashboard() {
     }, [analyses, selectedAnalysisForWaveform]);
 
     return (
-        <div className="dashboard">
-            {/* Navigation Bar */}
-            <nav className="dashboard-nav">
-                <h2>Dashboard</h2>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-                    <div className="dashboard-links">
-                        <Link to="/template-extraction">Template Extraction</Link>
-                        <Link to="/beat-detection">Beat Detection</Link>
-                        <Link to="/composer">Composer</Link>
-                        <Link to="/history">History</Link>
-                    </div>
-                    <UserProfile />
-                </div>
-            </nav>
-
-            {/* Search Bar */}
-            <section className="featured" style={{ paddingBottom: '20px' }}>
-                <input
-                    type="text"
-                    placeholder="Search templates..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    style={{
-                        width: '100%',
-                        maxWidth: '400px',
-                        padding: '10px 15px',
-                        backgroundColor: '#1f2937',
-                        border: '1px solid #374151',
-                        borderRadius: '8px',
-                        color: 'white',
-                        fontSize: '14px'
-                    }}
+        <div className="dashboard" style={{ position: 'relative' }}>
+            {/* Cubes Background */}
+            <div style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                zIndex: 0,
+                pointerEvents: 'auto'
+            }}>
+                <Cubes
+                    gridSize={12}
+                    maxAngle={60}
+                    radius={4}
+                    borderStyle="1px solid rgba(82, 39, 255, 0.3)"
+                    faceColor="#0a0a1a"
+                    rippleColor="#5227FF"
+                    rippleSpeed={1.5}
+                    autoAnimate={true}
+                    rippleOnClick={true}
                 />
-            </section>
-
-            {/* Beat History Section */}
-            <section className="beat-history">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
-                    <h3 style={{ margin: 0 }}>Beat History Timeline</h3>
-                    {analyses.length > 0 && (
-                        <select
-                            value={selectedAnalysisForWaveform?.id || ''}
-                            onChange={(e) => {
-                                const selected = analyses.find(a => a.id === e.target.value);
-                                setSelectedAnalysisForWaveform(selected);
-                            }}
-                            style={{
-                                padding: '6px 12px',
-                                backgroundColor: '#1f2937',
-                                border: '1px solid #374151',
-                                borderRadius: '6px',
-                                color: '#e5e7eb',
-                                fontSize: '13px',
-                                cursor: 'pointer'
-                            }}
-                        >
-                            {analyses.map(analysis => (
-                                <option key={analysis.id} value={analysis.id}>
-                                    {analysis.video_name}
-                                </option>
-                            ))}
-                        </select>
-                    )}
-                </div>
-                <div className="waveform-container" style={{ position: 'relative' }}>
-                    {selectedAnalysisForWaveform ? (
-                        <>
-                            <canvas
-                                ref={waveformCanvasRef}
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0
-                                }}
-                            />
-                            <div style={{
-                                position: 'absolute',
-                                top: '10px',
-                                left: '10px',
-                                fontSize: '11px',
-                                color: '#9ca3af',
-                                backgroundColor: 'rgba(31, 41, 55, 0.8)',
-                                padding: '4px 8px',
-                                borderRadius: '4px'
-                            }}>
-                                {selectedAnalysisForWaveform.transitions?.length || 0} transitions • {formatDuration(selectedAnalysisForWaveform.duration)}
-                            </div>
-                        </>
-                    ) : (
-                        <div className="waveform-placeholder">No data available</div>
-                    )}
-                </div>
-                <div className="heatmap-container" style={{ position: 'relative' }}>
-                    {analyses.length > 0 ? (
-                        <>
-                            <canvas
-                                ref={heatmapCanvasRef}
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    position: 'absolute',
-                                    top: 0,
-                                    left: 0
-                                }}
-                            />
-                            <div style={{
-                                position: 'absolute',
-                                top: '10px',
-                                left: '10px',
-                                fontSize: '11px',
-                                color: '#9ca3af',
-                                backgroundColor: 'rgba(31, 41, 55, 0.8)',
-                                padding: '4px 8px',
-                                borderRadius: '4px'
-                            }}>
-                                Transition density across all templates
-                            </div>
-                        </>
-                    ) : (
-                        <div className="heatmap-placeholder">No data available</div>
-                    )}
-                </div>
-            </section>
-
-            {/* Template Library Section */}
-            <section className="template-library">
-                <h3>Template Library</h3>
-                {isLoading ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
-                        <div style={{
-                            width: '40px',
-                            height: '40px',
-                            border: '3px solid #374151',
-                            borderTop: '3px solid #6b7280',
-                            borderRadius: '50%',
-                            margin: '0 auto',
-                            animation: 'spin 1s linear infinite'
-                        }}></div>
+            </div>            {/* Content wrapper with higher z-index */}
+            <div style={{ position: 'relative', zIndex: 1, pointerEvents: 'none' }}>
+                {/* Navigation Bar */}
+                <nav className="dashboard-nav" style={{ pointerEvents: 'auto' }}>
+                    <h2>Dashboard</h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+                        <div className="dashboard-links">
+                            <Link to="/template-extraction">Template Extraction</Link>
+                            <Link to="/beat-detection">Beat Detection</Link>
+                            <Link to="/composer">Composer</Link>
+                            <Link to="/history">History</Link>
+                        </div>
+                        <UserProfile />
                     </div>
-                ) : filteredAnalyses.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
-                        <p>No templates found. Analyze a video to create templates.</p>
-                        <Link to="/template-extraction" style={{ color: '#9ca3af', textDecoration: 'underline', marginTop: '10px', display: 'inline-block' }}>
-                            Go to Template Extraction
-                        </Link>
+                </nav>
+
+                {/* Search Bar */}
+                <section className="featured" style={{ paddingBottom: '20px', pointerEvents: 'auto' }}>
+                    <input
+                        type="text"
+                        placeholder="Search templates..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{
+                            width: '100%',
+                            maxWidth: '400px',
+                            padding: '10px 15px',
+                            backgroundColor: '#1f2937',
+                            border: '1px solid #374151',
+                            borderRadius: '8px',
+                            color: 'white',
+                            fontSize: '14px'
+                        }}
+                    />
+                </section>
+
+                {/* Beat History Section */}
+                <section className="beat-history" style={{ pointerEvents: 'auto' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px' }}>
+                        <h3 style={{ margin: 0 }}>Beat History Timeline</h3>
+                        {analyses.length > 0 && (
+                            <select
+                                value={selectedAnalysisForWaveform?.id || ''}
+                                onChange={(e) => {
+                                    const selected = analyses.find(a => a.id === e.target.value);
+                                    setSelectedAnalysisForWaveform(selected);
+                                }}
+                                style={{
+                                    padding: '6px 12px',
+                                    backgroundColor: '#1f2937',
+                                    border: '1px solid #374151',
+                                    borderRadius: '6px',
+                                    color: '#e5e7eb',
+                                    fontSize: '13px',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {analyses.map(analysis => (
+                                    <option key={analysis.id} value={analysis.id}>
+                                        {analysis.video_name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
-                ) : (
-                    <div className="template-grid">
-                        {filteredAnalyses.map((analysis) => (
-                            <div key={analysis.id} className="template-card">
-                                <div className="rhythm-block" style={{
-                                    position: 'relative',
-                                    overflow: 'hidden',
-                                    background: 'linear-gradient(90deg, #374151 20%, #1f2937 40%, #374151 60%)'
-                                }}>
-                                    <div style={{
+                    <div className="waveform-container" style={{ position: 'relative' }}>
+                        {selectedAnalysisForWaveform ? (
+                            <>
+                                <canvas
+                                    ref={waveformCanvasRef}
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
                                         position: 'absolute',
                                         top: 0,
-                                        left: 0,
-                                        right: 0,
-                                        bottom: 0,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '12px',
-                                        color: '#9ca3af'
+                                        left: 0
+                                    }}
+                                />
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '10px',
+                                    left: '10px',
+                                    fontSize: '11px',
+                                    color: '#9ca3af',
+                                    backgroundColor: 'rgba(31, 41, 55, 0.8)',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px'
+                                }}>
+                                    {selectedAnalysisForWaveform.transitions?.length || 0} transitions • {formatDuration(selectedAnalysisForWaveform.duration)}
+                                </div>
+                            </>
+                        ) : (
+                            <div className="waveform-placeholder">No data available</div>
+                        )}
+                    </div>
+                    <div className="heatmap-container" style={{ position: 'relative' }}>
+                        {analyses.length > 0 ? (
+                            <>
+                                <canvas
+                                    ref={heatmapCanvasRef}
+                                    style={{
+                                        width: '100%',
+                                        height: '100%',
+                                        position: 'absolute',
+                                        top: 0,
+                                        left: 0
+                                    }}
+                                />
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '10px',
+                                    left: '10px',
+                                    fontSize: '11px',
+                                    color: '#9ca3af',
+                                    backgroundColor: 'rgba(31, 41, 55, 0.8)',
+                                    padding: '4px 8px',
+                                    borderRadius: '4px'
+                                }}>
+                                    Transition density across all templates
+                                </div>
+                            </>
+                        ) : (
+                            <div className="heatmap-placeholder">No data available</div>
+                        )}
+                    </div>
+                </section>
+
+                {/* Template Library Section */}
+                <section className="template-library" style={{ pointerEvents: 'auto' }}>
+                    <h3>Template Library</h3>
+                    {isLoading ? (
+                        <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
+                            <div style={{
+                                width: '40px',
+                                height: '40px',
+                                border: '3px solid #374151',
+                                borderTop: '3px solid #6b7280',
+                                borderRadius: '50%',
+                                margin: '0 auto',
+                                animation: 'spin 1s linear infinite'
+                            }}></div>
+                        </div>
+                    ) : filteredAnalyses.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '40px', color: '#6b7280' }}>
+                            <p>No templates found. Analyze a video to create templates.</p>
+                            <Link to="/template-extraction" style={{ color: '#9ca3af', textDecoration: 'underline', marginTop: '10px', display: 'inline-block' }}>
+                                Go to Template Extraction
+                            </Link>
+                        </div>
+                    ) : (
+                        <div className="template-grid">
+                            {filteredAnalyses.map((analysis) => (
+                                <div key={analysis.id} className="template-card">
+                                    <div className="rhythm-block" style={{
+                                        position: 'relative',
+                                        overflow: 'hidden',
+                                        background: 'linear-gradient(90deg, #374151 20%, #1f2937 40%, #374151 60%)'
                                     }}>
-                                        {analysis.transitions.length} cuts • {formatDuration(analysis.duration)}
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            right: 0,
+                                            bottom: 0,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: '12px',
+                                            color: '#9ca3af'
+                                        }}>
+                                            {analysis.transitions.length} cuts • {formatDuration(analysis.duration)}
+                                        </div>
+                                    </div>
+                                    <p style={{ fontWeight: '500', marginBottom: '5px', color: '#ddd' }}>
+                                        {analysis.video_name}
+                                    </p>
+                                    <p style={{ fontSize: '11px', color: '#777', marginBottom: '8px' }}>
+                                        {format(new Date(analysis.created_date), 'MMM d, yyyy')}
+                                    </p>
+                                    <div style={{ display: 'flex', gap: '5px', justifyContent: 'space-between', flexWrap: 'wrap' }}>
+                                        <Link
+                                            to={`/composer?templateId=${analysis.id}`}
+                                            style={{
+                                                flex: 1,
+                                                minWidth: '70px',
+                                                padding: '6px 10px',
+                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                border: 'none',
+                                                borderRadius: '5px',
+                                                color: 'white',
+                                                fontSize: '12px',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                textAlign: 'center',
+                                                textDecoration: 'none',
+                                                transition: 'transform 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.transform = 'scale(1.02)'}
+                                            onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                                        >
+                                            Compose
+                                        </Link>
+                                        <Link
+                                            to={`/template-extraction?analysisId=${analysis.id}`}
+                                            style={{
+                                                flex: 1,
+                                                minWidth: '50px',
+                                                padding: '6px 10px',
+                                                backgroundColor: '#374151',
+                                                border: 'none',
+                                                borderRadius: '5px',
+                                                color: '#d1d5db',
+                                                fontSize: '12px',
+                                                cursor: 'pointer',
+                                                textAlign: 'center',
+                                                textDecoration: 'none',
+                                                transition: 'background 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#4b5563'}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = '#374151'}
+                                        >
+                                            View
+                                        </Link>
+                                        <button
+                                            onClick={() => handleDelete(analysis.id)}
+                                            style={{
+                                                padding: '6px 10px',
+                                                backgroundColor: '#441111',
+                                                border: 'none',
+                                                borderRadius: '5px',
+                                                color: '#ff6666',
+                                                fontSize: '12px',
+                                                cursor: 'pointer',
+                                                transition: 'background 0.2s'
+                                            }}
+                                            onMouseEnter={(e) => e.target.style.backgroundColor = '#661111'}
+                                            onMouseLeave={(e) => e.target.style.backgroundColor = '#441111'}
+                                        >
+                                            Delete
+                                        </button>
                                     </div>
                                 </div>
-                                <p style={{ fontWeight: '500', marginBottom: '5px', color: '#ddd' }}>
-                                    {analysis.video_name}
-                                </p>
-                                <p style={{ fontSize: '11px', color: '#777', marginBottom: '8px' }}>
-                                    {format(new Date(analysis.created_date), 'MMM d, yyyy')}
-                                </p>
-                                <div style={{ display: 'flex', gap: '5px', justifyContent: 'space-between', flexWrap: 'wrap' }}>
-                                    <Link
-                                        to={`/composer?templateId=${analysis.id}`}
-                                        style={{
-                                            flex: 1,
-                                            minWidth: '70px',
-                                            padding: '6px 10px',
-                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            color: 'white',
-                                            fontSize: '12px',
-                                            fontWeight: '600',
-                                            cursor: 'pointer',
-                                            textAlign: 'center',
-                                            textDecoration: 'none',
-                                            transition: 'transform 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.transform = 'scale(1.02)'}
-                                        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                                    >
-                                        Compose
-                                    </Link>
-                                    <Link
-                                        to={`/template-extraction?analysisId=${analysis.id}`}
-                                        style={{
-                                            flex: 1,
-                                            minWidth: '50px',
-                                            padding: '6px 10px',
-                                            backgroundColor: '#374151',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            color: '#d1d5db',
-                                            fontSize: '12px',
-                                            cursor: 'pointer',
-                                            textAlign: 'center',
-                                            textDecoration: 'none',
-                                            transition: 'background 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#4b5563'}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#374151'}
-                                    >
-                                        View
-                                    </Link>
-                                    <button
-                                        onClick={() => handleDelete(analysis.id)}
-                                        style={{
-                                            padding: '6px 10px',
-                                            backgroundColor: '#441111',
-                                            border: 'none',
-                                            borderRadius: '5px',
-                                            color: '#ff6666',
-                                            fontSize: '12px',
-                                            cursor: 'pointer',
-                                            transition: 'background 0.2s'
-                                        }}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#661111'}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = '#441111'}
-                                    >
-                                        Delete
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </section>
+                            ))}
+                        </div>
+                    )}
+                </section>
+            </div>
         </div>
     );
 }
