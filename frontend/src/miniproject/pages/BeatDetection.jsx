@@ -63,7 +63,7 @@ export default function BeatDetection() {
 
     const handleGoToEditor = () => {
         if (!beatData) return;
-        navigate("/video-editor", {
+        navigate("/composer", {
             state: {
                 beats: beatData.beats,
                 duration: beatData.duration,
@@ -141,7 +141,7 @@ export default function BeatDetection() {
                     </button>
                     {beatData && (
                         <button className="btn-outline" onClick={handleGoToEditor}>
-                            Proceed to Video Editor →
+                            Proceed to Composer →
                         </button>
                     )}
                 </div>

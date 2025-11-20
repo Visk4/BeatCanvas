@@ -81,8 +81,8 @@ def run_transition_analysis(task_id: str, file_path: str):
 
         print(f"[Task {task_id}] Video: {fps:.2f} FPS, {frame_count} frames, {duration:.2f}s")
 
-        # Analyze every Nth frame for performance (3 frames per second for better accuracy)
-        frame_skip = max(1, int(fps // 3))
+        # Analyze every Nth frame for performance (5 frames per second for higher accuracy)
+        frame_skip = max(1, int(fps // 5))
         frame_analysis = []
         frame_num = 0
         prev_frame_gray = None
@@ -137,8 +137,8 @@ def run_transition_analysis(task_id: str, file_path: str):
             hist_diff = np.sum((np.array(curr["histogram"]) - np.array(prev["histogram"])) ** 2)
             brightness_diff = abs(curr["brightness"] - prev["brightness"])
             
-            # Hard cut detection: significant histogram change OR high frame difference
-            if hist_diff > 0.3 or curr["frame_diff"] > 25:
+            # Hard cut detection: significant histogram change OR high frame difference (stricter thresholds)
+            if hist_diff > 0.5 or curr["frame_diff"] > 35:
                 confidence = min(1.0, (hist_diff + curr["frame_diff"] / 50) / 2)
                 transitions.append({
                     "timestamp": curr["timestamp"],
@@ -204,7 +204,7 @@ def run_transition_analysis(task_id: str, file_path: str):
         # Sort by timestamp and remove very close duplicates
         transitions.sort(key=lambda x: x["timestamp"])
         filtered_transitions = []
-        min_gap = 0.5  # Minimum 0.5 seconds between transitions
+        min_gap = 1.0  # Minimum 1.0 seconds between transitions for cleaner segmentation
         
         for t in transitions:
             if not filtered_transitions or (t["timestamp"] - filtered_transitions[-1]["timestamp"]) >= min_gap:

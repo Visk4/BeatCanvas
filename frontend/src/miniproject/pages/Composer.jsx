@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { base44 } from "../../api/client";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useLocation } from "react-router-dom";
 import TemplateSelector from "../../components/composer/TemplateSelector";
 import ContentUploader from "../../components/composer/ContentUploader";
 import BeatDetector from "../../components/composer/BeatDetector";
@@ -16,7 +16,11 @@ import "../styles/Dashboard.css";
 
 export default function Composer() {
     const [searchParams] = useSearchParams();
+    const location = useLocation();
     const templateId = searchParams.get('templateId');
+
+    // Get beat detection data from navigation state
+    const { beats = [], duration: stateDuration = 20, tempo = null, photos = {}, audioURL: stateAudioURL = null } = location.state || {};
 
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [uploadedContent, setUploadedContent] = useState({
@@ -65,16 +69,65 @@ export default function Composer() {
 
     const requiredImages = selectedTemplate ? selectedTemplate.transitions.length + 1 : 0;
     const activeTemplate = editedTemplate || optimizedTemplate || selectedTemplate;
-    const duration = activeTemplate?.duration || beatAnalysis?.duration || 20;
+    const duration = activeTemplate?.duration || beatAnalysis?.duration || stateDuration || 20;
 
-    // Create segments from template and uploaded content
+    // Initialize audio from beat detection if available
     useEffect(() => {
+        if (stateAudioURL && !uploadedContent.audio) {
+            setUploadedContent(prev => ({
+                ...prev,
+                audio: stateAudioURL
+            }));
+        }
+    }, [stateAudioURL]);
+
+    // Create segments from template OR from beat detection data
+    useEffect(() => {
+        // If we have beat detection data (from beat detection page)
+        if (beats.length > 0 && !activeTemplate) {
+            const beatSegments = beats.map((beat, i) => {
+                const nextBeat = beats[i + 1];
+                const start = Number(beat);
+                const end = nextBeat ? Number(nextBeat) : Math.min(Number(beat) + 1.5, stateDuration || Number(beat) + 1.5);
+                const imageUrl = photos[i] || null;
+
+                return {
+                    id: `beat-seg-${i}`,
+                    name: `Clip ${i + 1}`,
+                    start: start,
+                    end: end,
+                    duration: end - start,
+                    color: ["#4a90e2", "#e74c3c", "#2ecc71", "#f39c12", "#9b59b6"][i % 5],
+                    imageUrl: imageUrl,
+                    type: "image",
+                    transition: {
+                        type: 'fade',
+                        duration: 0.5
+                    }
+                };
+            });
+
+            setSegments(beatSegments);
+
+            // Also populate uploaded content with beat photos
+            if (Object.keys(photos).length > 0) {
+                const imageArray = Object.values(photos);
+                setUploadedContent(prev => ({
+                    ...prev,
+                    images: imageArray
+                }));
+            }
+            return;
+        }
+
+        // If we have template (from template extraction page)
         if (!activeTemplate) return;
 
         const newSegments = activeTemplate.transitions.map((t, i) => {
             const nextTransition = activeTemplate.transitions[i + 1];
             const start = t.timestamp;
-            const end = nextTransition ? nextTransition.timestamp : (activeTemplate.duration || start + 2);
+            // End clip 0.3s before next transition to avoid overlap
+            const end = nextTransition ? Math.max(start + 0.5, nextTransition.timestamp - 0.3) : (activeTemplate.duration || start + 2);
             const imageUrl = uploadedContent.images[i] || null;
 
             return {
@@ -94,7 +147,7 @@ export default function Composer() {
         });
 
         setSegments(newSegments);
-    }, [activeTemplate, uploadedContent.images]);
+    }, [activeTemplate, uploadedContent.images, beats, photos, stateDuration]);
 
     // Audio playback controls
     useEffect(() => {
