@@ -11,6 +11,7 @@ import VideoPreview from "../../components/composer/VideoPreview";
 import ExportControls from "../../components/composer/ExportControls";
 import TimelineEditor from "../../components/composer/TimelineEditor";
 import UserProfile from "../../components/UserProfile";
+import PillNav from "../../components/PillNav";
 import "../styles/VideoEditor.css";
 import "../styles/Dashboard.css";
 
@@ -20,15 +21,24 @@ export default function Composer() {
     const templateId = searchParams.get('templateId');
 
     // Get beat detection data from navigation state
-    const { beats = [], duration: stateDuration = 20, tempo = null, photos = {}, audioURL: stateAudioURL = null } = location.state || {};
+    const { beats = [], duration: stateDuration = 20, tempo = null, photos = {}, audioURL: stateAudioURL = null, preloadedImages = [] } = location.state || {};
+
+    // Debug logging
+    useEffect(() => {
+        console.log('🎵 Composer received location.state:', location.state);
+        console.log('📊 Beats:', beats);
+        console.log('🖼️ Photos:', photos);
+        console.log('🎧 Audio URL:', stateAudioURL);
+        console.log('📷 Preloaded Images:', preloadedImages);
+    }, [location.state, beats, photos, stateAudioURL, preloadedImages]);
 
     const [selectedTemplate, setSelectedTemplate] = useState(null);
     const [uploadedContent, setUploadedContent] = useState({
-        images: [],
+        images: preloadedImages.length > 0 ? preloadedImages : [],
         imageFiles: [],
         video: null,
         videoFile: null,
-        audio: null,
+        audio: stateAudioURL || null,
         audioFile: null
     });
     const [beatAnalysis, setBeatAnalysis] = useState(null);
@@ -71,6 +81,15 @@ export default function Composer() {
     const activeTemplate = editedTemplate || optimizedTemplate || selectedTemplate;
     const duration = activeTemplate?.duration || beatAnalysis?.duration || stateDuration || 20;
 
+    const navItems = [
+        { label: 'Home', href: '/' },
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Templates', href: '/template-extraction' },
+        { label: 'Beat Detect', href: '/beat-detection' },
+        { label: 'Composer', href: '/composer' },
+        { label: 'History', href: '/history' }
+    ];
+
     // Initialize audio from beat detection if available
     useEffect(() => {
         if (stateAudioURL && !uploadedContent.audio) {
@@ -81,14 +100,30 @@ export default function Composer() {
         }
     }, [stateAudioURL]);
 
+    // Load audio from selected template if it has extracted audio
+    useEffect(() => {
+        if (selectedTemplate?.audio_file_id && !uploadedContent.audio) {
+            const audioUrl = `http://localhost:8000/api/v1/files/${selectedTemplate.audio_file_id}`;
+            console.log('🎵 Loading audio from template:', audioUrl);
+            setUploadedContent(prev => ({
+                ...prev,
+                audio: audioUrl
+            }));
+        }
+    }, [selectedTemplate]);
+
     // Create segments from template OR from beat detection data
     useEffect(() => {
+        console.log('🔄 Segment creation effect triggered. Beats:', beats.length, 'activeTemplate:', activeTemplate);
+
         // If we have beat detection data (from beat detection page)
         if (beats.length > 0 && !activeTemplate) {
+            console.log('✅ Creating beat-based segments');
             const beatSegments = beats.map((beat, i) => {
                 const nextBeat = beats[i + 1];
                 const start = Number(beat);
                 const end = nextBeat ? Number(nextBeat) : Math.min(Number(beat) + 1.5, stateDuration || Number(beat) + 1.5);
+                const segmentDuration = end - start;
                 const imageUrl = photos[i] || null;
 
                 return {
@@ -96,17 +131,18 @@ export default function Composer() {
                     name: `Clip ${i + 1}`,
                     start: start,
                     end: end,
-                    duration: end - start,
+                    duration: segmentDuration,
                     color: ["#4a90e2", "#e74c3c", "#2ecc71", "#f39c12", "#9b59b6"][i % 5],
                     imageUrl: imageUrl,
                     type: "image",
                     transition: {
                         type: 'fade',
-                        duration: 0.5
+                        duration: Math.min(segmentDuration, 2.0) // Use segment duration but cap at 2.0s max
                     }
                 };
             });
 
+            console.log('📦 Beat segments created:', beatSegments);
             setSegments(beatSegments);
 
             // Also populate uploaded content with beat photos
@@ -185,12 +221,19 @@ export default function Composer() {
     };
 
     const handleSegmentsChange = (segments) => {
+        console.log('📊 Segments changed:', segments);
+
         // Update template with transition settings from Timeline Editor
         const baseTemplate = optimizedTemplate || selectedTemplate;
         if (!baseTemplate) return;
 
         const updatedTransitions = baseTemplate.transitions.map((t, index) => {
             const segment = segments[index];
+            console.log(`Mapping transition ${index}:`, {
+                segment_transition: segment?.transition,
+                original_type: t.transition_type,
+                new_type: segment?.transition?.type
+            });
             return {
                 ...t,
                 transition_type: segment?.transition?.type || t.transition_type || 'fade',
@@ -198,10 +241,15 @@ export default function Composer() {
             };
         });
 
+        console.log('✅ Updated transitions:', updatedTransitions);
+
         setEditedTemplate({
             ...baseTemplate,
             transitions: updatedTransitions
         });
+
+        // Also update segments state
+        setSegments(segments);
     };
 
     // VideoEditor-style functions
@@ -272,295 +320,100 @@ export default function Composer() {
 
     return (
         <div className="editor-container">
-            {/* Navbar */}
-            <nav className="editor-navbar">
-                <h2 className="editor-title">🎬 Beat Canvas Composer</h2>
-                <div className="nav-actions">
-                    <UserProfile />
-                    <Link to="/dashboard">
-                        <button className="btn-outline">🔙 Dashboard</button>
-                    </Link>
-                </div>
-            </nav>
+            {/* PillNav */}
+            <PillNav
+                logo="/logo.svg"
+                items={navItems}
+                activeHref={location.pathname}
+                baseColor="rgba(0, 0, 0, 0.9)"
+                pillColor="rgba(20, 20, 30, 0.95)"
+                hoveredPillTextColor="#ffffff"
+                pillTextColor="rgba(255, 255, 255, 0.7)"
+                rightContent={<UserProfile />}
+            />
 
-            <div className="editor-workspace">
-                {/* Sidebar */}
-                <aside className="editor-sidebar">
-                    <h3 className="sidebar-title">Template</h3>
-                    <div style={{ marginBottom: '1rem', fontSize: '0.85rem', color: '#888' }}>
-                        {selectedTemplate ? (
-                            <div>
-                                <div style={{ color: '#4a90e2', marginBottom: '0.5rem' }}>
-                                    ✓ {selectedTemplate.video_name?.substring(0, 20) || 'Template Selected'}
-                                </div>
-                                <div style={{ fontSize: '0.75rem' }}>
-                                    {selectedTemplate.transitions?.length || 0} transitions
-                                </div>
-                            </div>
-                        ) : (
-                            <div style={{ color: '#666' }}>No template selected</div>
-                        )}
-                    </div>
-
-                    <div className="divider"></div>
-
-                    <h3 className="sidebar-title">Tools</h3>
-                    <button className="tool-btn" onClick={handleAddClip}>
-                        ➕ Add Media
-                    </button>
-                    <button
-                        className="action-btn"
-                        onClick={deleteSegment}
-                        disabled={!selectedSegment}
-                        style={{ opacity: selectedSegment ? 1 : 0.5 }}
-                    >
-                        🗑 Delete Clip
-                    </button>
-
-                    <div className="divider"></div>
-
-                    <h3 className="sidebar-title">Zoom</h3>
-                    <div className="zoom-controls">
-                        <button className="zoom-btn" onClick={() => setZoom(Math.max(0.5, zoom - 0.25))}>−</button>
-                        <span className="zoom-text">{Math.round(zoom * 100)}%</span>
-                        <button className="zoom-btn" onClick={() => setZoom(Math.min(3, zoom + 0.25))}>+</button>
-                    </div>
-
-                    <div className="divider"></div>
-
-                    <h3 className="sidebar-title">Content</h3>
-                    <div style={{ fontSize: '0.75rem', color: '#888' }}>
-                        <div>Images: {uploadedContent.images.length}/{requiredImages}</div>
-                        <div>Audio: {uploadedContent.audio ? '✓' : '✗'}</div>
-                    </div>
-
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept="image/*,video/*"
-                        style={{ display: "none" }}
-                        onChange={handleMediaUpload}
-                    />
-                </aside>
-
-                {/* Main Content */}
-                <main className="editor-main">
-                    {/* Preview Section */}
-                    <section className="preview-section">
-                        <div className="preview-box">
-                            <div className="preview-content">
-                                {selectedSegment && segments.find(s => s.id === selectedSegment)?.imageUrl ? (
-                                    <img
-                                        src={segments.find(s => s.id === selectedSegment)?.imageUrl}
-                                        alt="Preview"
-                                        style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: 10 }}
-                                    />
-                                ) : composedVideoUrl ? (
-                                    <video src={composedVideoUrl} controls style={{ width: "100%", borderRadius: 10 }} />
-                                ) : (
-                                    <>
-                                        <div className="waveform">🎬</div>
-                                        <p className="preview-text">Video Composer</p>
-                                        <p className="preview-subtext">
-                                            {selectedSegment
-                                                ? `Selected: ${segments.find(s => s.id === selectedSegment)?.name}`
-                                                : selectedTemplate
-                                                    ? "Upload content to start composing"
-                                                    : "Select a template to begin"}
-                                        </p>
-                                    </>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Audio Controls */}
-                        <div className="controls">
-                            <audio ref={audioRef} src={uploadedContent.audio || beatAnalysis?.audio_url}></audio>
-                            <button className="ctrl-btn" onClick={() => {
-                                if (audioRef.current) {
-                                    audioRef.current.currentTime = 0;
-                                    setCurrentTime(0);
-                                }
-                            }}>⏮</button>
-                            <button className="btn-play" onClick={togglePlay}>
-                                {isPlaying ? "⏸" : "▶"}
-                            </button>
-                            <button className="ctrl-btn" onClick={() => {
-                                if (audioRef.current) {
-                                    audioRef.current.currentTime = duration;
-                                    setCurrentTime(duration);
-                                }
-                            }}>⏭</button>
-                            <span className="time-display">
-                                {formatTime(currentTime)} / {formatTime(duration)}
-                            </span>
-                        </div>
+            <div style={{ padding: '2rem', width: '100%', margin: '0', marginTop: '80px' }}>
+                {/* Template Selector */}
+                {!selectedTemplate && (
+                    <section style={{ padding: '2rem', borderTop: '1px solid #2a2a2a' }}>
+                        <TemplateSelector
+                            analyses={analyses}
+                            selectedTemplate={selectedTemplate}
+                            onSelectTemplate={setSelectedTemplate}
+                        />
                     </section>
+                )}
 
-                    {/* Timeline Section */}
-                    <section className="timeline-section">
-                        <div className="timeline-header">
-                            <h3 className="timeline-title">Timeline</h3>
-                            <div className="timeline-info">
-                                {selectedSegment && (
-                                    <span className="selected-info">
-                                        ✓ {segments.find(s => s.id === selectedSegment)?.name}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-
-                        <div
-                            ref={timelineRef}
-                            className="timeline-container"
-                            onClick={handleTimelineClick}
-                        >
-                            {/* Ruler */}
-                            <div className="timeline-ruler">
-                                {[...Array(11)].map((_, i) => (
-                                    <div key={i} className="ruler-mark">
-                                        <span className="ruler-label">
-                                            {formatTime((duration / 10) * i)}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Timeline Track */}
-                            <div
-                                className="timeline-track"
-                                style={{
-                                    transform: `scaleX(${zoom})`,
-                                    transformOrigin: "left center"
-                                }}
-                            >
-                                {/* Segments */}
-                                {segments.map((segment) => {
-                                    const left = (segment.start / (duration || 1)) * 100;
-                                    const width = ((segment.end - segment.start) / (duration || 1)) * 100;
-                                    return (
-                                        <div
-                                            key={segment.id}
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                setSelectedSegment(segment.id);
-                                            }}
-                                            className={`segment ${selectedSegment === segment.id ? "selected" : ""}`}
-                                            style={{
-                                                left: `${left}%`,
-                                                width: `${width}%`,
-                                                backgroundColor: segment.color,
-                                            }}
-                                        >
-                                            {segment.imageUrl ? (
-                                                <div className="segment-media-preview">
-                                                    <img src={segment.imageUrl} alt="" />
-                                                </div>
-                                            ) : (
-                                                <span className="segment-name">{segment.name}</span>
-                                            )}
-                                            <div className="segment-times">
-                                                {formatTime(segment.start)} - {formatTime(segment.end)}
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-
-                                {/* Playhead */}
-                                <div
-                                    className="playhead"
-                                    style={{
-                                        left: `${Math.max(0, Math.min((currentTime / (duration || 1)) * 100, 100))}%`
-                                    }}
-                                >
-                                    <div className="playhead-line"></div>
-                                    <div className="playhead-top"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Template Selector & Content Upload - Collapsible */}
-                    {!selectedTemplate && (
-                        <section style={{ padding: '2rem', borderTop: '1px solid #2a2a2a' }}>
-                            <TemplateSelector
-                                analyses={analyses}
-                                selectedTemplate={selectedTemplate}
-                                onSelectTemplate={setSelectedTemplate}
+                {selectedTemplate && (
+                    <section style={{ padding: '2rem', borderTop: '1px solid #2a2a2a' }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '20px',
+                            marginBottom: '20px'
+                        }}>
+                            <ContentUploader
+                                requiredImages={requiredImages}
+                                uploadedContent={uploadedContent}
+                                onContentChange={setUploadedContent}
                             />
-                        </section>
-                    )}
 
-                    {selectedTemplate && (
-                        <section style={{ padding: '2rem', borderTop: '1px solid #2a2a2a' }}>
-                            <div style={{
-                                display: 'grid',
-                                gridTemplateColumns: '1fr 1fr',
-                                gap: '20px',
-                                marginBottom: '20px'
-                            }}>
-                                <ContentUploader
-                                    requiredImages={requiredImages}
-                                    uploadedContent={uploadedContent}
-                                    onContentChange={setUploadedContent}
-                                />
+                            <BeatDetector
+                                template={selectedTemplate}
+                                onBeatsDetected={(analysis) => {
+                                    setBeatAnalysis(analysis);
+                                    setUploadedContent(prev => ({
+                                        ...prev,
+                                        audio: analysis.audio_url,
+                                        audioFile: prev.audioFile
+                                    }));
+                                }}
+                                onAudioFileChange={(file) => {
+                                    setUploadedContent(prev => ({ ...prev, audioFile: file }));
+                                }}
+                            />
+                        </div>
 
-                                <BeatDetector
-                                    template={selectedTemplate}
-                                    onBeatsDetected={(analysis) => {
-                                        setBeatAnalysis(analysis);
-                                        setUploadedContent(prev => ({
-                                            ...prev,
-                                            audio: analysis.audio_url,
-                                            audioFile: prev.audioFile
-                                        }));
-                                    }}
-                                    onAudioFileChange={(file) => {
-                                        setUploadedContent(prev => ({ ...prev, audioFile: file }));
-                                    }}
+                        {/* Transition Correlation */}
+                        {beatAnalysis && (
+                            <TransitionCorrelation
+                                template={selectedTemplate}
+                                beatAnalysis={beatAnalysis}
+                                onApplySuggestions={handleApplySuggestions}
+                            />
+                        )}
+
+                        {/* Timeline Editor with Transition Controls */}
+                        {(activeTemplate || beats.length > 0) && (
+                            <div style={{ marginTop: '20px' }}>
+                                <TimelineEditor
+                                    template={activeTemplate}
+                                    content={uploadedContent}
+                                    onSegmentsChange={handleSegmentsChange}
+                                    initialSegments={beats.length > 0 && !activeTemplate ? segments : null}
                                 />
                             </div>
+                        )}
 
-                            {/* Transition Correlation */}
-                            {beatAnalysis && (
-                                <TransitionCorrelation
-                                    template={selectedTemplate}
+                        {/* Export Controls */}
+                        {(uploadedContent.images.length === requiredImages || uploadedContent.video) && (
+                            <div style={{ marginTop: '20px' }}>
+                                <ExportControls
+                                    template={activeTemplate}
+                                    content={uploadedContent}
                                     beatAnalysis={beatAnalysis}
-                                    onApplySuggestions={handleApplySuggestions}
+                                    onComposeStart={() => setIsComposing(true)}
+                                    onComposeEnd={(videoUrl) => {
+                                        setComposedVideoUrl(videoUrl);
+                                        setIsComposing(false);
+                                    }}
+                                    composedVideoUrl={composedVideoUrl}
+                                    isComposing={isComposing}
                                 />
-                            )}
-
-                            {/* Timeline Editor with Transition Controls */}
-                            {activeTemplate && (
-                                <div style={{ marginTop: '20px' }}>
-                                    <TimelineEditor
-                                        template={activeTemplate}
-                                        content={uploadedContent}
-                                        onSegmentsChange={handleSegmentsChange}
-                                    />
-                                </div>
-                            )}
-
-                            {/* Export Controls */}
-                            {activeTemplate && (uploadedContent.images.length === requiredImages || uploadedContent.video) && (
-                                <div style={{ marginTop: '20px' }}>
-                                    <ExportControls
-                                        template={activeTemplate}
-                                        content={uploadedContent}
-                                        beatAnalysis={beatAnalysis}
-                                        onComposeStart={() => setIsComposing(true)}
-                                        onComposeEnd={(videoUrl) => {
-                                            setComposedVideoUrl(videoUrl);
-                                            setIsComposing(false);
-                                        }}
-                                        composedVideoUrl={composedVideoUrl}
-                                        isComposing={isComposing}
-                                    />
-                                </div>
-                            )}
-                        </section>
-                    )}
-                </main>
+                            </div>
+                        )}
+                    </section>
+                )}
             </div>
         </div>
     );

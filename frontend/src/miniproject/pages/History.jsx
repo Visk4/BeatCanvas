@@ -1,14 +1,25 @@
 import React from "react";
 import { base44 } from "../../api/client";
 import { format } from "date-fns";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import UserProfile from "../../components/UserProfile";
+import PillNav from "../../components/PillNav";
 import "../styles/Dashboard.css";
 
 export default function History() {
     const queryClient = useQueryClient();
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const navItems = [
+        { label: 'Home', href: '/' },
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Templates', href: '/template-extraction' },
+        { label: 'Beat Detect', href: '/beat-detection' },
+        { label: 'Composer', href: '/composer' },
+        { label: 'History', href: '/history' }
+    ];
 
     const { data: analyses, isLoading: loading, refetch } = useQuery({
         queryKey: ['analyses-history'],
@@ -60,24 +71,29 @@ export default function History() {
 
     return (
         <div style={{ minHeight: '100vh', padding: '40px 20px', color: '#e5e7eb', backgroundColor: '#111827' }}>
-            <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+            {/* PillNav */}
+            <PillNav
+                logo="/logo.svg"
+                items={navItems}
+                activeHref={location.pathname}
+                baseColor="rgba(0, 0, 0, 0.9)"
+                pillColor="rgba(20, 20, 30, 0.95)"
+                hoveredPillTextColor="#ffffff"
+                pillTextColor="rgba(255, 255, 255, 0.7)"
+                rightContent={<UserProfile />}
+            />
+
+            <div style={{ maxWidth: '1200px', margin: '0 auto', marginTop: '80px' }}>
                 <div style={{ marginBottom: '40px' }}>
-                    <div style={{ display: 'flex', alignItems: 'start', justifyContent: 'space-between' }}>
-                        <div>
-                            <h1 style={{
-                                fontSize: '2.5rem',
-                                fontWeight: 'bold',
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                marginBottom: '10px'
-                            }}>
-                                Analysis History
-                            </h1>
-                            <p style={{ color: '#9ca3af' }}>View and manage your previous video analyses</p>
-                        </div>
-                        <UserProfile />
-                    </div>
+                    <h1 style={{
+                        fontSize: '2.5rem',
+                        fontWeight: 'bold',
+                        color: 'white',
+                        marginBottom: '10px'
+                    }}>
+                        Analysis History
+                    </h1>
+                    <p style={{ color: '#9ca3af' }}>View and manage your previous video analyses</p>
                 </div>
 
                 {analyses.length === 0 ? (
@@ -86,7 +102,7 @@ export default function History() {
                             width: '80px',
                             height: '80px',
                             margin: '0 auto 20px',
-                            background: 'linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%)',
+                            background: '#2e2e33',
                             borderRadius: '50%',
                             display: 'flex',
                             alignItems: 'center',
@@ -104,7 +120,7 @@ export default function History() {
                         <Link to="/template-extraction">
                             <button style={{
                                 padding: '12px 24px',
-                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                background: '#5227FF',
                                 border: 'none',
                                 borderRadius: '8px',
                                 color: 'white',
@@ -193,7 +209,7 @@ export default function History() {
                                                         style={{
                                                             flex: 1,
                                                             padding: '10px',
-                                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                            background: '#5227FF',
                                                             border: 'none',
                                                             borderRadius: '6px',
                                                             color: 'white',

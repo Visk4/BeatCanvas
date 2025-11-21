@@ -1,18 +1,30 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { base44 } from "../../api/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format } from "date-fns";
 import UserProfile from "../../components/UserProfile";
+import UserImageGallery from "../../components/UserImageGallery";
 import Cubes from "../../components/Cubes";
+import PillNav from "../../components/PillNav";
 import "../styles/Dashboard.css";
 
 export default function Dashboard() {
+    const location = useLocation();
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedAnalysisForWaveform, setSelectedAnalysisForWaveform] = useState(null);
     const queryClient = useQueryClient();
     const waveformCanvasRef = useRef(null);
     const heatmapCanvasRef = useRef(null);
+
+    const navItems = [
+        { label: 'Home', href: '/' },
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Templates', href: '/template-extraction' },
+        { label: 'Beat Detect', href: '/beat-detection' },
+        { label: 'Composer', href: '/composer' },
+        { label: 'History', href: '/history' }
+    ];
 
     const { data: analyses, refetch, isLoading } = useQuery({
         queryKey: ['all-analyses'],
@@ -155,6 +167,17 @@ export default function Dashboard() {
 
     return (
         <div className="dashboard" style={{ position: 'relative' }}>
+            <PillNav
+                logo="/logo.svg"
+                logoAlt="BeatCanvas"
+                items={navItems}
+                activeHref={location.pathname}
+                baseColor="#111827"
+                pillColor="#ffffff"
+                hoveredPillTextColor="#111827"
+                pillTextColor="#111827"
+                rightContent={<UserProfile />}
+            />
             {/* Cubes Background */}
             <div style={{
                 position: 'fixed',
@@ -178,22 +201,8 @@ export default function Dashboard() {
                 />
             </div>            {/* Content wrapper with higher z-index */}
             <div style={{ position: 'relative', zIndex: 1, pointerEvents: 'none' }}>
-                {/* Navigation Bar */}
-                <nav className="dashboard-nav" style={{ pointerEvents: 'auto' }}>
-                    <h2>Dashboard</h2>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-                        <div className="dashboard-links">
-                            <Link to="/template-extraction">Template Extraction</Link>
-                            <Link to="/beat-detection">Beat Detection</Link>
-                            <Link to="/composer">Composer</Link>
-                            <Link to="/history">History</Link>
-                        </div>
-                        <UserProfile />
-                    </div>
-                </nav>
-
                 {/* Search Bar */}
-                <section className="featured" style={{ paddingBottom: '20px', pointerEvents: 'auto' }}>
+                <section className="featured" style={{ paddingTop: '80px', paddingBottom: '20px', pointerEvents: 'auto' }}>
                     <input
                         type="text"
                         placeholder="Search templates..."
@@ -332,7 +341,7 @@ export default function Dashboard() {
                                     <div className="rhythm-block" style={{
                                         position: 'relative',
                                         overflow: 'hidden',
-                                        background: 'linear-gradient(90deg, #374151 20%, #1f2937 40%, #374151 60%)'
+                                        background: '#1f2937'
                                     }}>
                                         <div style={{
                                             position: 'absolute',
@@ -362,7 +371,7 @@ export default function Dashboard() {
                                                 flex: 1,
                                                 minWidth: '70px',
                                                 padding: '6px 10px',
-                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                background: '#5227FF',
                                                 border: 'none',
                                                 borderRadius: '5px',
                                                 color: 'white',

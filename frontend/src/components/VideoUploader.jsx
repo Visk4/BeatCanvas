@@ -277,40 +277,38 @@ export default function VideoUploader({ onVideoUploaded, onAnalysisStart }) {
         let analysis = null;
 
         try {
-            // Analyze video file with HIGH sampling rate
-            const { duration, frameAnalysis } = await analyzeVideoFile(file);
-
-            // Upload video file
+            // Upload video file to backend for analysis
             const formData = new FormData();
             formData.append("file", file);
-            const { data: uploadResponse } = await client.post("/upload-file", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
 
-            // Create video analysis record
-            const { data: createdAnalysis } = await client.post("/video-analysis", {
-                video_url: uploadResponse.file_url,
-                video_name: file.name,
-                analysis_status: 'processing',
-                duration: duration,
+            // Backend handles everything: upload, transition detection, and clip extraction
+            const { data: createdAnalysis } = await client.post("/analyze-video", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
             });
 
             analysis = createdAnalysis;
 
-            // Call onVideoUploaded immediately after initial analysis record creation
+            // Call onVideoUploaded immediately
             onVideoUploaded(analysis);
 
-            // Simulate processing time
-            await new Promise(resolve => setTimeout(resolve, 4000));
+            // Poll for analysis completion (backend processes in background)
+            let attempts = 0;
+            const maxAttempts = 60; // 60 seconds max wait
 
-            // Detect transitions with HIGH SENSITIVITY
-            const transitions = detectTransitions(frameAnalysis, duration);
+            while (attempts < maxAttempts) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
 
-            // Update analysis with results
-            const { data: updatedAnalysis } = await client.put(`/video-analysis/${analysis.id}`, {
-                transitions: transitions,
-                analysis_status: 'completed'
-            });
+                const { data: updatedAnalysis } = await client.get(`/analyses/${analysis.id}`);
+
+                if (updatedAnalysis.analysis_status === 'completed') {
+                    onVideoUploaded(updatedAnalysis);
+                    break;
+                } else if (updatedAnalysis.analysis_status === 'failed') {
+                    throw new Error('Analysis failed');
+                }
+
+                attempts++;
+            }
 
         } catch (error) {
             console.error('Analysis process failed:', error);

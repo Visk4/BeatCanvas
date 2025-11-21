@@ -5,6 +5,10 @@ import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login.jsx';
 import Register from './pages/Register.jsx';
 import OAuthCallback from './pages/OAuthCallback.jsx';
+import Unauthorized from './pages/Unauthorized.jsx';
+
+// Protected Route wrapper
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 // New MiniProject UI (now the primary app UI)
 import MPHome from './miniproject/pages/Home.jsx';
@@ -19,21 +23,44 @@ export default function App() {
     // Override previous UI: wire the new MiniProject pages as the primary routes
     return (
         <Routes>
-            {/* New default landing page */}
+            {/* Public routes */}
             <Route path="/" element={<MPHome />} />
-
-            {/* MiniProject app routes */}
-            <Route path="/dashboard" element={<MPDashboard />} />
-            <Route path="/template-extraction" element={<MPTemplateExtraction />} />
-            <Route path="/beat-detection" element={<MPBeatDetection />} />
-            <Route path="/video-editor" element={<MPVideoEditor />} />
-            <Route path="/history" element={<MPHistory />} />
-            <Route path="/composer" element={<MPComposer />} />
-
-            {/* Keep auth routes accessible */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/auth/callback" element={<OAuthCallback />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+
+            {/* Protected MiniProject app routes */}
+            <Route path="/dashboard" element={
+                <ProtectedRoute>
+                    <MPDashboard />
+                </ProtectedRoute>
+            } />
+            <Route path="/template-extraction" element={
+                <ProtectedRoute>
+                    <MPTemplateExtraction />
+                </ProtectedRoute>
+            } />
+            <Route path="/beat-detection" element={
+                <ProtectedRoute>
+                    <MPBeatDetection />
+                </ProtectedRoute>
+            } />
+            <Route path="/video-editor" element={
+                <ProtectedRoute>
+                    <MPVideoEditor />
+                </ProtectedRoute>
+            } />
+            <Route path="/history" element={
+                <ProtectedRoute>
+                    <MPHistory />
+                </ProtectedRoute>
+            } />
+            <Route path="/composer" element={
+                <ProtectedRoute>
+                    <MPComposer />
+                </ProtectedRoute>
+            } />
         </Routes>
     );
 }

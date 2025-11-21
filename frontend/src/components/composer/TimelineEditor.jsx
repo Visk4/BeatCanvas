@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 
 const TRANSITION_TYPES = [
+    { id: 'original', name: 'Original (Extracted)', icon: '🎬' },
     { id: 'fade', name: 'Fade', icon: '🌫️' },
     { id: 'slide-left', name: 'Slide Left', icon: '⬅️' },
     { id: 'slide-right', name: 'Slide Right', icon: '➡️' },
@@ -14,7 +15,7 @@ const TRANSITION_TYPES = [
     { id: 'none', name: 'Cut (No Transition)', icon: '✂️' }
 ];
 
-export default function TimelineEditor({ template, content, onSegmentsChange }) {
+export default function TimelineEditor({ template, content, onSegmentsChange, initialSegments = null }) {
     const [segments, setSegments] = useState([]);
     const [selectedSegment, setSelectedSegment] = useState(null);
     const [currentTime, setCurrentTime] = useState(0);
@@ -26,10 +27,17 @@ export default function TimelineEditor({ template, content, onSegmentsChange }) 
 
     const duration = template?.duration || 20;
 
-    // Initialize segments from template transitions
+    // Initialize segments from initialSegments (beat-based) or template transitions
     useEffect(() => {
+        // If initialSegments provided (from beat detection), use those
+        if (initialSegments && initialSegments.length > 0 && segments.length === 0) {
+            setSegments(initialSegments);
+            return;
+        }
+
+        // Otherwise use template transitions (from template extraction)
         if (template && template.transitions && segments.length === 0) {
-            const initialSegments = template.transitions.map((t, i) => ({
+            const initialSegs = template.transitions.map((t, i) => ({
                 id: `seg-${i}`,
                 name: `Clip ${i + 1}`,
                 start: t.timestamp,
@@ -42,9 +50,9 @@ export default function TimelineEditor({ template, content, onSegmentsChange }) 
                     duration: t.transition_duration || 0.5
                 }
             }));
-            setSegments(initialSegments);
+            setSegments(initialSegs);
         }
-    }, [template, content.images, duration, segments.length]);
+    }, [template, content.images, duration, segments.length, initialSegments]);
 
     // Update segments when content changes
     useEffect(() => {
@@ -59,6 +67,7 @@ export default function TimelineEditor({ template, content, onSegmentsChange }) 
     // Notify parent of segment changes
     useEffect(() => {
         if (onSegmentsChange) {
+            console.log('🔄 useEffect triggered, calling onSegmentsChange with:', segments);
             onSegmentsChange(segments);
         }
     }, [segments, onSegmentsChange]);
@@ -115,11 +124,16 @@ export default function TimelineEditor({ template, content, onSegmentsChange }) 
     };
 
     const updateSegmentTransition = (segmentId, transitionType, transitionDuration) => {
-        setSegments(prev => prev.map(seg =>
-            seg.id === segmentId
-                ? { ...seg, transition: { type: transitionType, duration: transitionDuration } }
-                : seg
-        ));
+        console.log('🎬 Updating transition:', { segmentId, transitionType, transitionDuration });
+        setSegments(prev => {
+            const updated = prev.map(seg =>
+                seg.id === segmentId
+                    ? { ...seg, transition: { type: transitionType, duration: transitionDuration } }
+                    : seg
+            );
+            console.log('Updated segments:', updated);
+            return updated;
+        });
     };
 
     const selectedSegmentData = segments.find(s => s.id === selectedSegment);
@@ -377,6 +391,7 @@ export default function TimelineEditor({ template, content, onSegmentsChange }) 
                             {(() => {
                                 const type = selectedSegmentData?.transition?.type;
                                 switch (type) {
+                                    case 'original': return 'Uses the actual transition extracted from the original video - preserves authentic style and timing';
                                     case 'fade': return 'Smooth opacity transition between clips';
                                     case 'slide-left': return 'Next clip slides in from right';
                                     case 'slide-right': return 'Next clip slides in from left';

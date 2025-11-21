@@ -2,7 +2,8 @@ import React, { useState, useRef } from "react";
 import "../styles/BeatDetection.css";
 import UserProfile from "../../components/UserProfile";
 import Particles from "../../components/Particles";
-import { useNavigate, Link } from "react-router-dom";
+import PillNav from "../../components/PillNav";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 export default function BeatDetection() {
     const [audioFile, setAudioFile] = useState(null);
@@ -12,6 +13,16 @@ export default function BeatDetection() {
     const [blockImages, setBlockImages] = useState({});
     const fileInputs = useRef({});
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const navItems = [
+        { label: 'Home', href: '/' },
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Templates', href: '/template-extraction' },
+        { label: 'Beat Detect', href: '/beat-detection' },
+        { label: 'Composer', href: '/composer' },
+        { label: 'History', href: '/history' }
+    ];
 
     const handleAudioUpload = (e) => {
         const file = e.target.files[0];
@@ -61,21 +72,79 @@ export default function BeatDetection() {
         }
     };
 
-    const handleGoToEditor = () => {
+    const handleGoToEditor = async () => {
         if (!beatData) return;
-        navigate("/composer", {
-            state: {
-                beats: beatData.beats,
-                duration: beatData.duration,
-                tempo: beatData.tempo,
-                photos: blockImages,
-                audioURL,
-            },
-        });
+
+        try {
+            setLoading(true);
+
+            // Create a VideoAnalysis template from beat data with varied transitions
+            const transitionTypes = ['fade', 'dissolve', 'wipeleft', 'wiperight', 'slideup', 'slidedown'];
+            const transitions = beatData.beats.map((beat, i) => {
+                const randomType = transitionTypes[i % transitionTypes.length];
+                return {
+                    timestamp: beat,
+                    transition_type: randomType,
+                    transition_duration: 0.5,
+                    type: randomType,  // Keep for backwards compat
+                    confidence: 0.95
+                };
+            });
+
+            const response = await fetch('http://localhost:8000/api/v1/video-analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify({
+                    video_url: audioURL,
+                    video_name: audioFile.name,
+                    analysis_status: 'completed',
+                    duration: beatData.duration,
+                    transitions: transitions
+                })
+            });
+
+            if (!response.ok) throw new Error('Failed to create template');
+
+            const template = await response.json();
+            console.log('✅ Created template:', template.id);
+
+            // Navigate to composer with templateId and pass images/audio through state
+            const imageUrls = Object.values(blockImages);
+            navigate(`/composer?templateId=${template.id}`, {
+                state: {
+                    beats: beatData.beats,
+                    preloadedImages: imageUrls,
+                    photos: blockImages,
+                    audioURL,
+                    tempo: beatData.tempo,
+                    duration: beatData.duration
+                }
+            });
+        } catch (err) {
+            console.error('❌ Error creating template:', err);
+            alert('Failed to create template. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <div style={{ position: 'relative', minHeight: '100vh' }}>
+            {/* PillNav */}
+            <PillNav
+                logo="/logo.svg"
+                items={navItems}
+                activeHref={location.pathname}
+                baseColor="rgba(0, 0, 0, 0.9)"
+                pillColor="rgba(20, 20, 30, 0.95)"
+                hoveredPillTextColor="#ffffff"
+                pillTextColor="rgba(255, 255, 255, 0.7)"
+                rightContent={<UserProfile />}
+            />
+
             {/* Particles Background */}
             <div style={{
                 position: 'fixed',
@@ -99,28 +168,7 @@ export default function BeatDetection() {
 
             {/* Content */}
             <div className="beat-detection-page" style={{ position: 'relative', zIndex: 1, pointerEvents: 'none' }}>
-                <nav style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '20px 60px',
-                    borderBottom: '1px solid rgba(55, 65, 81, 0.5)',
-                    backgroundColor: 'rgba(17, 24, 39, 0.5)',
-                    backdropFilter: 'blur(10px)',
-                    pointerEvents: 'auto'
-                }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-                        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'white', margin: 0 }}>Beat Detection</h2>
-                        <div style={{ display: 'flex', gap: '20px' }}>
-                            <Link to="/dashboard" style={{ color: '#9ca3af', textDecoration: 'none', fontWeight: '500' }}>Dashboard</Link>
-                            <Link to="/template-extraction" style={{ color: '#9ca3af', textDecoration: 'none', fontWeight: '500' }}>Templates</Link>
-                            <Link to="/composer" style={{ color: '#9ca3af', textDecoration: 'none', fontWeight: '500' }}>Composer</Link>
-                        </div>
-                    </div>
-                    <UserProfile />
-                </nav>
-
-                <div className="beat-header" style={{ pointerEvents: 'auto' }}>
+                <div className="beat-header" style={{ pointerEvents: 'auto', marginTop: '100px' }}>
                     <h1>Beat Detection</h1>
                     <p>
                         Upload an audio file to detect cinematic beats and create timestamped photo blocks for video syncing.

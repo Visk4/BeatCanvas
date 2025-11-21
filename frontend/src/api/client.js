@@ -26,6 +26,23 @@ client.interceptors.request.use((config) => {
     return config;
 });
 
+// Add response interceptor to handle 401 errors
+client.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response?.status === 401) {
+            // Clear token and redirect to unauthorized page
+            clearToken();
+            if (window.location.pathname !== '/login' &&
+                window.location.pathname !== '/register' &&
+                window.location.pathname !== '/unauthorized') {
+                window.location.href = '/unauthorized';
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 // --- Helper Functions to mimic Base 44 ---
 
 // Mimics base44.integrations.Core.UploadFile

@@ -1,23 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
 import VideoUploader from "../../components/VideoUploader";
 import VideoPlayer from "../../components/VideoPlayer";
 import TransitionResults from "../../components/TransitionResults";
 import AnalysisProgress from "../../components/AnalysisProgress";
 import UserProfile from "../../components/UserProfile";
 import Particles from "../../components/Particles";
+import PillNav from "../../components/PillNav";
 import { base44 } from "../../api/client";
 import "../styles/Dashboard.css";
 
 export default function TemplateExtraction() {
     const [searchParams] = useSearchParams();
+    const location = useLocation();
     const analysisId = searchParams.get('analysisId');
 
     const [currentAnalysis, setCurrentAnalysis] = useState(null);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [selectedTimestamp, setSelectedTimestamp] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    const navItems = [
+        { label: 'Home', href: '/' },
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Templates', href: '/template-extraction' },
+        { label: 'Beat Detect', href: '/beat-detection' },
+        { label: 'Composer', href: '/composer' },
+        { label: 'History', href: '/history' }
+    ];
 
     // Load existing analysis from URL parameter
     useEffect(() => {
@@ -58,6 +69,18 @@ export default function TemplateExtraction() {
 
     return (
         <div style={{ minHeight: '100vh', position: 'relative' }}>
+            {/* PillNav */}
+            <PillNav
+                logo="/logo.svg"
+                items={navItems}
+                activeHref={location.pathname}
+                baseColor="rgba(0, 0, 0, 0.9)"
+                pillColor="rgba(20, 20, 30, 0.95)"
+                hoveredPillTextColor="#ffffff"
+                pillTextColor="rgba(255, 255, 255, 0.7)"
+                rightContent={<UserProfile />}
+            />
+
             {/* Particles Background */}
             <div style={{
                 position: 'fixed',
@@ -81,22 +104,7 @@ export default function TemplateExtraction() {
 
             {/* Content */}
             <div style={{ position: 'relative', zIndex: 1, pointerEvents: 'none' }}>
-                <nav style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: '20px 40px',
-                    borderBottom: '1px solid rgba(55, 65, 81, 0.5)',
-                    marginBottom: '20px',
-                    backgroundColor: 'rgba(17, 24, 39, 0.5)',
-                    backdropFilter: 'blur(10px)',
-                    pointerEvents: 'auto'
-                }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: 'white' }}>Template Extraction</h2>
-                    <UserProfile />
-                </nav>
-
-                <main style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto', pointerEvents: 'auto' }}>
+                <main style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto', pointerEvents: 'auto', marginTop: '100px' }}>
                     <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                         <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', color: 'white', marginBottom: '10px' }}>
                             Extract Transition Templates

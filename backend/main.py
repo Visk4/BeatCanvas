@@ -14,7 +14,7 @@ import datetime
 import os
 import io
 import tempfile
-from tasks import start_background_task, run_transition_analysis, run_madmom_beat_analysis
+from tasks import start_background_task, run_transition_analysis, run_madmom_beat_analysis, compose_video_with_ffmpeg
 from passlib.context import CryptContext
 from jose import JWTError, jwt
 from pydantic import BaseModel, EmailStr
@@ -615,6 +615,133 @@ async def delete_analysis(id: str, request: Request):
         raise HTTPException(status_code=404, detail="Analysis not found or not owned by user")
     
     return {"success": True, "id": id}
+
+
+@app.post(f"{API_PREFIX}/compose-video")
+async def compose_video_endpoint(
+    images: list[UploadFile] = File(...),
+    audio: UploadFile = File(None),
+    transitions_json: str = None,
+    duration: float = 10.0
+):
+    """
+    Compose video from images with transitions using FFmpeg.
+    Accepts images, audio, transitions config, and produces final video.
+    """
+    try:
+        print(f"🎬 Compose video request received")
+        print(f"   Images: {len(images)}")
+        print(f"   Audio: {audio.filename if audio else 'None'}")
+        print(f"   Duration: {duration}s")
+        
+        # Parse transitions
+        import json
+        transitions = []
+        if transitions_json:
+            transitions = json.loads(transitions_json)
+            print(f"   Transitions: {len(transitions)}")
+        
+        # Save uploaded images to temp files
+        temp_images = []
+        for idx, img_file in enumerate(images):
+            temp_img = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(img_file.filename)[1])
+            content = await img_file.read()
+            temp_img.write(content)
+            temp_img.close()
+            temp_images.append(temp_img.name)
+            print(f"  ✓ Image {idx}: {img_file.filename}")
+        
+        # Save audio to temp file
+        temp_audio = None
+        if audio:
+            temp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(audio.filename)[1])
+            content = await audio.read()
+            temp_audio.write(content)
+            temp_audio.close()
+            temp_audio = temp_audio.name
+            print(f"  ✓ Audio: {audio.filename}")
+        
+        # Download any transition clips from GridFS (extracted from original video)
+        for transition in transitions:
+            if transition.get('clip_file_id'):
+                try:
+                    clip_id = transition['clip_file_id']
+                    grid_out = await app.fs.open_download_stream(ObjectId(clip_id))
+                    clip_content = await grid_out.read()
+                    
+                    temp_clip = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
+                    temp_clip.write(clip_content)
+                    temp_clip.close()
+                    
+                    transition['clip_path'] = temp_clip.name
+                    print(f"  ✓ Downloaded {transition.get('transition_type', 'unknown')} clip: {clip_id}")
+                except Exception as e:
+                    print(f"  ⚠️ Failed to load transition clip {clip_id}: {e}")
+        
+        # Create output file
+        output_file = tempfile.NamedTemporaryFile(delete=False, suffix='.mp4')
+        output_path = output_file.name
+        output_file.close()
+        
+        # Run FFmpeg composition in background thread
+        success = compose_video_with_ffmpeg(
+            images=temp_images,
+            audio_path=temp_audio,
+            transitions=transitions,
+            duration=duration,
+            output_path=output_path
+        )
+        
+        if not success:
+            raise HTTPException(status_code=500, detail="Video composition failed")
+        
+        # Upload composed video to GridFS
+        with open(output_path, 'rb') as f:
+            video_content = f.read()
+        
+        file_id = await app.fs.upload_from_stream(
+            "composed_video.mp4",
+            io.BytesIO(video_content),
+            metadata={
+                "content_type": "video/mp4",
+                "composed_at": datetime.datetime.utcnow(),
+                "duration": duration
+            }
+        )
+        
+        video_url = f"{BASE_URL}{API_PREFIX}/files/{str(file_id)}"
+        
+        # Cleanup temp files
+        for temp_img in temp_images:
+            try:
+                os.unlink(temp_img)
+            except:
+                pass
+        if temp_audio:
+            try:
+                os.unlink(temp_audio)
+            except:
+                pass
+        try:
+            os.unlink(output_path)
+        except:
+            pass
+        
+        print(f"✅ Video composition complete: {video_url}")
+        
+        return {
+            "success": True,
+            "video_url": video_url,
+            "file_id": str(file_id),
+            "duration": duration
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Composition failed: {str(e)}")
 
 
 # --- Run Server ---

@@ -1,11 +1,21 @@
 import React, { useState, useRef, useEffect } from "react";
 import "../styles/VideoEditor.css";
+import PillNav from "../../components/PillNav";
 import { useLocation, useNavigate } from "react-router-dom";
 
 export default function VideoEditor() {
     const location = useLocation();
     const navigate = useNavigate();
     const { beats = [], duration = 20, tempo = null, photos = {}, audioURL = "https://cdn.pixabay.com/download/audio/2022/03/15/audio_cadf26aaf0.mp3" } = location.state || {};
+
+    const navItems = [
+        { label: 'Home', href: '/' },
+        { label: 'Dashboard', href: '/dashboard' },
+        { label: 'Templates', href: '/template-extraction' },
+        { label: 'Beat Detect', href: '/beat-detection' },
+        { label: 'Composer', href: '/composer' },
+        { label: 'History', href: '/history' }
+    ];
 
     const audioRef = useRef(null);
     const timelineRef = useRef(null);
@@ -170,15 +180,21 @@ export default function VideoEditor() {
 
     return (
         <div className="editor-container">
-            <nav className="editor-navbar">
-                <h2 className="editor-title">Beat Canvas Editor</h2>
-                <div className="nav-actions">
+            {/* PillNav */}
+            <PillNav
+                logo="/logo.svg"
+                items={navItems}
+                activeHref={location.pathname}
+                baseColor="rgba(0, 0, 0, 0.9)"
+                pillColor="rgba(20, 20, 30, 0.95)"
+                hoveredPillTextColor="#ffffff"
+                pillTextColor="rgba(255, 255, 255, 0.7)"
+                rightContent={
                     <button className="btn-outline" onClick={handleAudioUploadClick}>🎵 Upload Audio</button>
-                    <button className="btn-outline" onClick={() => navigate(-1)}>🔙 Back</button>
-                </div>
-            </nav>
+                }
+            />
 
-            <div className="editor-workspace">
+            <div className="editor-workspace" style={{ marginTop: '80px' }}>
                 <aside className="editor-sidebar">
                     <h3 className="sidebar-title">Tools</h3>
                     <button className={`tool-btn ${!selectedSegment ? "active" : ""}`} onClick={() => setSelectedSegment(null)}>⬚ Select</button>

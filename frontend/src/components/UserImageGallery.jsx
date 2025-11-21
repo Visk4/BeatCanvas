@@ -1,12 +1,15 @@
 import React, { useState, useRef } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "../api/client";
 
-export default function UserImageGallery({ onSelectImage }) {
+export default function UserImageGallery({ onSelectImage, multiSelect = false }) {
     const [showGallery, setShowGallery] = useState(false);
+    const [selectedImages, setSelectedImages] = useState([]);
     const fileInputRef = useRef(null);
     const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
     const { data: images = [], isLoading } = useQuery({
         queryKey: ['user-images'],
@@ -49,10 +52,32 @@ export default function UserImageGallery({ onSelectImage }) {
     };
 
     const handleImageClick = (image) => {
-        if (onSelectImage) {
-            onSelectImage(image.file_url);
+        if (multiSelect) {
+            setSelectedImages(prev => {
+                const isSelected = prev.find(img => img.id === image.id);
+                if (isSelected) {
+                    return prev.filter(img => img.id !== image.id);
+                } else {
+                    return [...prev, image];
+                }
+            });
+        } else {
+            if (onSelectImage) {
+                onSelectImage(image.file_url);
+            }
+            setShowGallery(false);
         }
+    };
+
+    const handleGoToComposer = () => {
+        const imageUrls = selectedImages.map(img => img.file_url);
+        navigate('/composer', {
+            state: {
+                preloadedImages: imageUrls
+            }
+        });
         setShowGallery(false);
+        setSelectedImages([]);
     };
 
     return (
@@ -131,9 +156,26 @@ export default function UserImageGallery({ onSelectImage }) {
                                     color: '#e5e7eb',
                                     margin: 0
                                 }}>
-                                    My Image Gallery
+                                    My Image Gallery {multiSelect && selectedImages.length > 0 && `(${selectedImages.length} selected)`}
                                 </h2>
                                 <div style={{ display: 'flex', gap: '10px' }}>
+                                    {multiSelect && selectedImages.length > 0 && (
+                                        <button
+                                            onClick={handleGoToComposer}
+                                            style={{
+                                                padding: '8px 16px',
+                                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                                border: 'none',
+                                                borderRadius: '6px',
+                                                color: 'white',
+                                                fontWeight: '600',
+                                                cursor: 'pointer',
+                                                fontSize: '13px'
+                                            }}
+                                        >
+                                            🎬 Create Video ({selectedImages.length} images)
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
                                         disabled={uploadMutation.isPending}
@@ -222,69 +264,93 @@ export default function UserImageGallery({ onSelectImage }) {
                                         gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
                                         gap: '15px'
                                     }}>
-                                        {images.map((image) => (
-                                            <motion.div
-                                                key={image.id}
-                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                style={{
-                                                    position: 'relative',
-                                                    aspectRatio: '1',
-                                                    borderRadius: '8px',
-                                                    overflow: 'hidden',
-                                                    cursor: 'pointer',
-                                                    border: '1px solid #374151',
-                                                    transition: 'transform 0.2s'
-                                                }}
-                                                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                                                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
-                                                onClick={() => handleImageClick(image)}
-                                            >
-                                                <img
-                                                    src={image.file_url}
-                                                    alt={image.original_name}
+                                        {images.map((image) => {
+                                            const isSelected = multiSelect && selectedImages.find(img => img.id === image.id);
+                                            return (
+                                                <motion.div
+                                                    key={image.id}
+                                                    initial={{ opacity: 0, scale: 0.9 }}
+                                                    animate={{ opacity: 1, scale: 1 }}
                                                     style={{
-                                                        width: '100%',
-                                                        height: '100%',
-                                                        objectFit: 'cover'
-                                                    }}
-                                                />
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        if (window.confirm('Delete this image?')) {
-                                                            deleteMutation.mutate(image.id);
-                                                        }
-                                                    }}
-                                                    style={{
-                                                        position: 'absolute',
-                                                        top: '8px',
-                                                        right: '8px',
-                                                        width: '28px',
-                                                        height: '28px',
-                                                        borderRadius: '50%',
-                                                        backgroundColor: 'rgba(239, 68, 68, 0.9)',
-                                                        border: 'none',
-                                                        color: 'white',
-                                                        fontSize: '14px',
+                                                        position: 'relative',
+                                                        aspectRatio: '1',
+                                                        borderRadius: '8px',
+                                                        overflow: 'hidden',
                                                         cursor: 'pointer',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        opacity: 0,
-                                                        transition: 'opacity 0.2s'
+                                                        border: isSelected ? '3px solid #10b981' : '1px solid #374151',
+                                                        transition: 'transform 0.2s, border 0.2s',
+                                                        boxShadow: isSelected ? '0 0 20px rgba(16, 185, 129, 0.5)' : 'none'
                                                     }}
-                                                    onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                                                    className="delete-btn"
+                                                    onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+                                                    onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                                    onClick={() => handleImageClick(image)}
                                                 >
-                                                    🗑
-                                                </button>
-                                                <style>{`
+                                                    <img
+                                                        src={image.file_url}
+                                                        alt={image.original_name}
+                                                        style={{
+                                                            width: '100%',
+                                                            height: '100%',
+                                                            objectFit: 'cover',
+                                                            opacity: isSelected ? 0.8 : 1
+                                                        }}
+                                                    />
+                                                    {isSelected && (
+                                                        <div style={{
+                                                            position: 'absolute',
+                                                            top: '8px',
+                                                            left: '8px',
+                                                            width: '32px',
+                                                            height: '32px',
+                                                            borderRadius: '50%',
+                                                            background: '#10b981',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            fontSize: '18px',
+                                                            fontWeight: 'bold',
+                                                            color: 'white'
+                                                        }}>
+                                                            ✓
+                                                        </div>
+                                                    )}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (window.confirm('Delete this image?')) {
+                                                                deleteMutation.mutate(image.id);
+                                                            }
+                                                        }}
+                                                        style={{
+                                                            position: 'absolute',
+                                                            top: '8px',
+                                                            right: '8px',
+                                                            width: '28px',
+                                                            height: '28px',
+                                                            borderRadius: '50%',
+                                                            backgroundColor: 'rgba(239, 68, 68, 0.9)',
+                                                            border: 'none',
+                                                            color: 'white',
+                                                            fontSize: '14px',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center',
+                                                            opacity: 0,
+                                                            transition: 'opacity 0.2s'
+                                                        }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                                                        className="delete-btn"
+                                                    >
+                                                        🗑
+                                                    </button>
+                                                    <style>{`
                                                     .delete-btn:hover { opacity: 1 !important; }
                                                     div:hover .delete-btn { opacity: 1; }
                                                 `}</style>
-                                            </motion.div>
-                                        ))}
+                                                </motion.div>
+                                            );
+                                        })}
                                     </div>
                                 )}
                             </div>

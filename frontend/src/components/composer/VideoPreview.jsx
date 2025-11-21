@@ -118,8 +118,8 @@ export default function VideoPreview({ template, content, composedVideoUrl, isCo
                                                     key={index}
                                                     onClick={() => setCurrentSlide(index)}
                                                     className={`flex-1 h-2 rounded-full transition-colors ${index === currentSlide
-                                                            ? "bg-gradient-to-r from-purple-500 to-cyan-500"
-                                                            : "bg-white/20"
+                                                        ? "bg-gradient-to-r from-purple-500 to-cyan-500"
+                                                        : "bg-white/20"
                                                         }`}
                                                 />
                                             ))}
@@ -129,37 +129,7 @@ export default function VideoPreview({ template, content, composedVideoUrl, isCo
                             )}
                         </div>
 
-                        {/* ✅ Transition timeline display */}
-                        {template?.transitions?.length > 0 && (
-                            <div className="bg-white/5 rounded-xl p-4">
-                                <h4 className="text-white font-medium mb-3">
-                                    Transition Timeline
-                                </h4>
-                                <div className="space-y-2">
-                                    {template.transitions.map((transition, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-center justify-between p-3 bg-black/40 rounded-lg border border-white/10"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Badge
-                                                    variant="outline"
-                                                    className="border-purple-500/30 text-purple-300 capitalize text-xs"
-                                                >
-                                                    {transition.type}
-                                                </Badge>
-                                                <span className="text-gray-300 text-sm">
-                                                    Slide {index + 1} → {index + 2}
-                                                </span>
-                                            </div>
-                                            <div className="text-gray-400 text-sm font-mono">
-                                                {formatTime(transition.timestamp)}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+
                     </>
                 )}
             </CardContent>
